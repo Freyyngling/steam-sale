@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steam セール — 割引率順</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --surface3: #1e2a40;
+    --border: #2a3a55;
+    --border-bright: #3a5080;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --gold: #fbbf24;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --text-mid: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(56,189,248,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 0%, rgba(129,140,248,0.06) 0%, transparent 60%);
+  }
+
+  /* ===================== ヘッダー ===================== */
+  header {
+    background: linear-gradient(180deg, #0f1929 0%, #111827 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(56,189,248,0.08);
+  }
+
+  .logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    white-space: nowrap;
+  }
+
+  .logo-sep {
+    color: var(--border-bright);
+    font-weight: 300;
+    -webkit-text-fill-color: var(--border-bright);
+  }
+
+  /* 注意書き */
+  .header-notice {
+    font-size: 12px;
+    color: var(--gold);
+    line-height: 1.6;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.9;
+  }
+
+  .notice-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .fetch-btn {
+    background: linear-gradient(135deg, #1d4ed8, #4f46e5);
+    border: 1px solid rgba(129,140,248,0.4);
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+    text-transform: uppercase;
+    box-shadow: 0 0 12px rgba(79,70,229,0.3);
+  }
+  .fetch-btn:hover { opacity: 0.85; box-shadow: 0 0 20px rgba(79,70,229,0.5); }
+  .fetch-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+
+  .header-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: right;
+    line-height: 1.8;
+    white-space: nowrap;
+  }
+  #last-updated { color: var(--accent); font-weight: 500; }
+
+  /* ステータスバー */
+  #status-bar {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 32px;
+    font-size: 12px;
+    color: var(--text-dim);
+    display: none;
+  }
+  #status-bar.visible { display: block; }
+  #status-bar.error { color: #f87171; }
+  #status-bar.ok { color: var(--accent); }
+
+  /* ===================== ソートバー ===================== */
+  .sort-bar {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .bar-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-right: 4px;
+  }
+
+  .sort-select {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .sort-select:hover { border-color: var(--border-bright); }
+  .sort-select:focus { border-color: var(--accent); }
+  .sort-select.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(56,189,248,0.08);
+  }
+
+  .sort-btn {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .sort-btn:hover { border-color: var(--border-bright); color: var(--text); }
+  .sort-btn.active {
+    background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(129,140,248,0.15));
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ===================== フィルターパネル ===================== */
+  .filter-panel {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .filter-section-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    min-width: 76px;
+    flex-shrink: 0;
+  }
+
+  /* スライダー共通 */
+  .dual-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .slider-sub-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 160px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 6px rgba(56,189,248,0.5);
+  }
+
+  .range-display {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    min-width: 86px;
+    white-space: nowrap;
+  }
+
+  /* トグルボタン */
+  .toggle-btn {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 11px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .toggle-btn:hover { border-color: var(--border-bright); color: var(--text); }
+  .toggle-btn.active {
+    background: rgba(251,191,36,0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .toggle-btn.genre-btn.active {
+    background: rgba(129,140,248,0.15);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .toggle-btn.cat-btn.active {
+    background: rgba(56,189,248,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .filter-select {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+    max-width: 200px;
+    transition: border-color 0.15s;
+  }
+  .filter-select:focus { border-color: var(--accent); color: var(--text); }
+
+  .filter-reset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-left: auto;
+  }
+  .filter-reset-btn:hover { border-color: #f87171; color: #f87171; }
+
+  /* ===================== メイン ===================== */
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-mid);
+  }
+  .section-title .highlight {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .count-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* 初期状態 */
+  #empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-dim);
+  }
+  #empty-state .big { font-size: 48px; margin-bottom: 16px; }
+  #empty-state p { font-size: 14px; line-height: 2.2; }
+  #empty-state strong { color: var(--text); }
+
+  /* ===================== グリッド ===================== */
+  #game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+  }
+
+  .game-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    animation: fadeIn 0.3s ease both;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    position: relative;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .game-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(56,189,248,0.04), rgba(129,140,248,0.04));
+    opacity: 0;
+    transition: opacity 0.18s;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .game-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.4),
+      0 0 0 1px rgba(56,189,248,0.2),
+      0 0 20px rgba(56,189,248,0.08);
+  }
+  .game-card:hover::before { opacity: 1; }
+  .game-card:hover .game-name { color: var(--accent); }
+
+  .thumb-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 460/215;
+    overflow: hidden;
+    background: var(--surface2);
+  }
+
+  .game-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.22s ease;
+  }
+  .game-card:hover img { transform: scale(1.05); }
+
+  /* 画像上のグラデーション */
+  .thumb-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(transparent, rgba(0,0,0,0.5));
+    pointer-events: none;
+  }
+
+  .img-fallback {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 8px;
+    background: var(--surface2);
+  }
+
+  .jp-badge {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    background: rgba(251,191,36,0.92);
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .steam-link-hint {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.8);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.15s;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .game-card:hover .steam-link-hint { opacity: 1; }
+
+  .card-body { padding: 12px; }
+
+  .game-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.45;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 38px;
+    transition: color 0.15s;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .discount-badge {
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 5px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .price-block { text-align: right; line-height: 1.3; }
+
+  .original-price {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-decoration: line-through;
+  }
+
+  .sale-price {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .card-meta {
+    margin-top: 9px;
+    font-size: 10px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .card-genre {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--accent2);
+    opacity: 0.8;
+  }
+
+  /* もっと見る */
+  .load-more-wrap { text-align: center; margin-top: 48px; }
+
+  #load-more-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 14px 52px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    display: none;
+    box-shadow: 0 0 12px rgba(56,189,248,0.1);
+  }
+  #load-more-btn.visible { display: inline-block; }
+  #load-more-btn:hover {
+    background: rgba(56,189,248,0.1);
+    box-shadow: 0 0 24px rgba(56,189,248,0.25);
+  }
+  #load-more-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .load-more-info {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* 注記フッター */
+  .data-note {
+    margin-top: 56px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(251,191,36,0.02));
+    border: 1px solid rgba(251,191,36,0.2);
+    border-radius: 8px;
+  }
+  .data-note strong { color: var(--gold); }
+  .data-note p {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.9;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">Steam<span class="logo-sep"> / </span>Sale</div>
+    <div class="header-right">
+      <button class="fetch-btn" id="fetch-btn" onclick="loadData()">表示を更新</button>
+      <div class="header-meta">
+        取得日時：<span id="last-updated">—</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-notice">
+    <span class="notice-icon">⚠️</span>
+    データ取得日時と実際の表示時間には差がある場合があります。セールが終了して価格が変わっている可能性もありますので、購入前に必ず Steam ストアで価格をご確認ください。
+  </div>
+</header>
+
+<div id="status-bar"></div>
+
+<!-- ソートバー -->
+<div class="sort-bar">
+  <span class="bar-label">並び替え</span>
+
+  <select class="sort-select active" id="sort-discount" onchange="onSelectSort('discount', this)">
+    <option value="discount_desc" selected>割引率 高い順</option>
+    <option value="discount_asc">割引率 低い順</option>
+  </select>
+
+  <select class="sort-select" id="sort-price" onchange="onSelectSort('price', this)">
+    <option value="">価格で並び替え</option>
+    <option value="price_asc">価格 安い順</option>
+    <option value="price_desc">価格 高い順</option>
+  </select>
+
+  <select class="sort-select" id="sort-release" onchange="onSelectSort('release', this)">
+    <option value="">リリース日で並び替え</option>
+    <option value="release_desc">リリース日 新しい順</option>
+    <option value="release_asc">リリース日 古い順</option>
+  </select>
+
+  <button class="sort-btn" data-sort="name">名前順</button>
+  <button class="sort-btn" data-sort="relevance">適合性</button>
+</div>
+
+<!-- フィルターパネル -->
+<div class="filter-panel">
+
+  <!-- 価格スライダー -->
+  <div class="filter-row">
+    <span class="filter-section-label">価格上限</span>
+    <div class="slider-group">
+      <input type="range" id="price-slider" min="0" max="10000" step="100" value="10000">
+      <div class="range-display" id="price-display">上限なし</div>
+    </div>
+  </div>
+
+  <!-- 割引率スライダー -->
+  <div class="filter-row">
+    <span class="filter-section-label">割引率下限</span>
+    <div class="slider-group">
+      <input type="range" id="discount-slider" min="0" max="100" step="5" value="0">
+      <div class="range-display" id="discount-display">0% 以上</div>
+    </div>
+  </div>
+
+  <!-- 日本語フィルター -->
+  <div class="filter-row">
+    <span class="filter-section-label">言語</span>
+    <button class="toggle-btn" id="jp-toggle" onclick="toggleJP()">🇯🇵 日本語対応のみ</button>
+  </div>
+
+  <!-- ジャンル -->
+  <div class="filter-row">
+    <span class="filter-section-label">ジャンル</span>
+    <div id="genre-buttons" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+  </div>
+
+  <!-- カテゴリ -->
+  <div class="filter-row">
+    <span class="filter-section-label">カテゴリ</span>
+    <div id="category-buttons" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+  </div>
+
+  <!-- 開発会社・パブリッシャー -->
+  <div class="filter-row">
+    <span class="filter-section-label">開発会社</span>
+    <select class="filter-select" id="dev-select">
+      <option value="">すべて</option>
+    </select>
+    <span class="filter-section-label" style="margin-left:8px;">パブリッシャー</span>
+    <select class="filter-select" id="pub-select">
+      <option value="">すべて</option>
+    </select>
+    <button class="filter-reset-btn" onclick="resetAll()">フィルターをリセット</button>
+  </div>
+
+</div>
+
+<main>
+  <div class="section-header">
+    <div class="section-title">現在の<span class="highlight">セール</span>タイトル</div>
+    <div class="count-badge" id="count-badge">— 件</div>
+  </div>
+
+  <div id="empty-state">
+    <div class="big">🎮</div>
+    <p>
+      <strong>steam_data.json を読み込んでいます...</strong><br>
+      表示されない場合は先に fetch_steam.py を実行してください
+    </p>
+  </div>
+
+  <div id="game-grid"></div>
+
+  <div class="load-more-wrap">
+    <button id="load-more-btn">さらに下へ</button>
+    <div class="load-more-info" id="load-more-info"></div>
+  </div>
+
+  <div class="data-note">
+    <strong>⚠ 価格についてのご注意</strong>
+    <p>
+      このページに表示されている価格・割引率は、fetch_steam.py を実行してデータを取得した時点のものです。<br>
+      セールはいつでも終了する可能性があり、表示されている価格と Steam ストアの実際の価格が異なる場合があります。<br>
+      購入を検討される際は、必ず Steam ストアのページで最新の価格をご確認ください。
+    </p>
+  </div>
+</main>
+
+<script>
+// =====================================================
+// 割引率 → バッジカラー
+// =====================================================
+function discountColor(pct) {
+  if (pct >= 90) return '#e03030';
+  if (pct >= 80) return '#e06520';
+  if (pct >= 70) return '#e09020';
+  if (pct >= 60) return '#c8b520';
+  if (pct >= 50) return '#90c020';
+  if (pct >= 40) return '#40b840';
+  if (pct >= 30) return '#20a880';
+  if (pct >= 20) return '#2090c8';
+  if (pct >= 10) return '#2060e0';
+  return '#3040c0';
+}
+
+// =====================================================
+// ソート
+// =====================================================
+let currentSort = 'discount_desc';
+
+function sortGames(games, key) {
+  return [...games].sort((a, b) => {
+    switch(key) {
+      case 'discount_desc':  return b.discount_pct - a.discount_pct;
+      case 'discount_asc':   return a.discount_pct - b.discount_pct;
+      case 'price_asc':      return a.final_price - b.final_price;
+      case 'price_desc':     return b.final_price - a.final_price;
+      case 'release_desc':   return (b.release_date||'').localeCompare(a.release_date||'');
+      case 'release_asc':    return (a.release_date||'').localeCompare(b.release_date||'');
+      case 'name':           return a.name.localeCompare(b.name, 'ja');
+      case 'relevance':      return b.relevance_score - a.relevance_score;
+      default: return 0;
+    }
+  });
+}
+
+function updateSortUI(activeKey) {
+  document.querySelectorAll('.sort-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.sort === activeKey));
+
+  const dSel = document.getElementById('sort-discount');
+  const pSel = document.getElementById('sort-price');
+  const rSel = document.getElementById('sort-release');
+
+  const dActive = activeKey === 'discount_desc' || activeKey === 'discount_asc';
+  const pActive = activeKey === 'price_asc'     || activeKey === 'price_desc';
+  const rActive = activeKey === 'release_desc'  || activeKey === 'release_asc';
+
+  dSel.classList.toggle('active', dActive);
+  pSel.classList.toggle('active', pActive);
+  rSel.classList.toggle('active', rActive);
+
+  if (dActive) dSel.value = activeKey; else dSel.value = 'discount_desc';
+  if (pActive) pSel.value = activeKey; else pSel.value = '';
+  if (rActive) rSel.value = activeKey; else rSel.value = '';
+}
+
+function onSelectSort(type, sel) {
+  if (!sel.value) return;
+  currentSort = sel.value;
+  updateSortUI(currentSort);
+  applyAndRender();
+}
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (masterGames.length === 0) return;
+    currentSort = btn.dataset.sort;
+    updateSortUI(currentSort);
+    applyAndRender();
+  });
+});
+
+// =====================================================
+// フィルター状態
+// =====================================================
+const filters = {
+  priceMax:      10000,
+  discountMin:   0,
+  jpOnly:        false,
+  genres:        new Set(),
+  categories:    new Set(),
+  developer:     '',
+  publisher:     '',
+};
+const PRICE_MAX = 10000;
+
+function applyFilters(games) {
+  return games.filter(g => {
+    if (filters.priceMax < PRICE_MAX && g.final_price > filters.priceMax) return false;
+    if (filters.discountMin > 0 && g.discount_pct < filters.discountMin) return false;
+    if (filters.jpOnly && !g.japanese) return false;
+    if (filters.genres.size > 0 && !(g.genres||[]).some(gr => filters.genres.has(gr))) return false;
+    if (filters.categories.size > 0 && !(g.categories||[]).some(c => filters.categories.has(c))) return false;
+    if (filters.developer && !(g.developers||[]).includes(filters.developer)) return false;
+    if (filters.publisher && !(g.publishers||[]).includes(filters.publisher)) return false;
+    return true;
+  });
+}
+
+// 価格スライダー
+document.getElementById('price-slider').addEventListener('input', function() {
+  filters.priceMax = parseInt(this.value);
+  document.getElementById('price-display').textContent =
+    filters.priceMax >= PRICE_MAX ? '上限なし' : `¥${filters.priceMax.toLocaleString()}以下`;
+  applyAndRender();
+});
+
+// 割引率スライダー
+document.getElementById('discount-slider').addEventListener('input', function() {
+  filters.discountMin = parseInt(this.value);
+  document.getElementById('discount-display').textContent =
+    filters.discountMin === 0 ? '0% 以上' : `${filters.discountMin}% 以上`;
+  applyAndRender();
+});
+
+function toggleJP() {
+  filters.jpOnly = !filters.jpOnly;
+  document.getElementById('jp-toggle').classList.toggle('active', filters.jpOnly);
+  applyAndRender();
+}
+
+document.getElementById('dev-select').addEventListener('change', function() {
+  filters.developer = this.value; applyAndRender();
+});
+document.getElementById('pub-select').addEventListener('change', function() {
+  filters.publisher = this.value; applyAndRender();
+});
+
+function resetAll() {
+  filters.priceMax    = PRICE_MAX;
+  filters.discountMin = 0;
+  filters.jpOnly      = false;
+  filters.genres      = new Set();
+  filters.categories  = new Set();
+  filters.developer   = '';
+  filters.publisher   = '';
+
+  document.getElementById('price-slider').value    = PRICE_MAX;
+  document.getElementById('discount-slider').value = 0;
+  document.getElementById('price-display').textContent    = '上限なし';
+  document.getElementById('discount-display').textContent = '0% 以上';
+  document.getElementById('jp-toggle').classList.remove('active');
+  document.querySelectorAll('#genre-buttons .toggle-btn, #category-buttons .toggle-btn')
+    .forEach(b => b.classList.remove('active'));
+  document.getElementById('dev-select').value = '';
+  document.getElementById('pub-select').value = '';
+  applyAndRender();
+}
+
+// =====================================================
+// フィルターUI構築
+// =====================================================
+function buildFilterButtons(games) {
+  const genreCount = {};
+  games.forEach(g => (g.genres||[]).forEach(gr => {
+    genreCount[gr] = (genreCount[gr]||0) + 1;
+  }));
+  const topGenres = Object.entries(genreCount).sort((a,b)=>b[1]-a[1]).slice(0,12).map(e=>e[0]);
+
+  const genreWrap = document.getElementById('genre-buttons');
+  genreWrap.innerHTML = '';
+  topGenres.forEach(gr => {
+    const btn = document.createElement('button');
+    btn.className = 'toggle-btn genre-btn';
+    btn.textContent = gr;
+    btn.addEventListener('click', () => {
+      if (filters.genres.has(gr)) { filters.genres.delete(gr); btn.classList.remove('active'); }
+      else { filters.genres.add(gr); btn.classList.add('active'); }
+      applyAndRender();
+    });
+    genreWrap.appendChild(btn);
+  });
+
+  const CAT_KEYWORDS = ['シングル','マルチ','協力','実績','クラウド','コントローラー','VR',
+    'Single','Multi','Co-op','Achievements','controller','Cloud'];
+  const catCount = {};
+  games.forEach(g => (g.categories||[]).forEach(c => {
+    if (CAT_KEYWORDS.some(k => c.includes(k))) catCount[c] = (catCount[c]||0) + 1;
+  }));
+  const topCats = Object.entries(catCount).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]);
+
+  const catWrap = document.getElementById('category-buttons');
+  catWrap.innerHTML = '';
+  topCats.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'toggle-btn cat-btn';
+    btn.textContent = c;
+    btn.addEventListener('click', () => {
+      if (filters.categories.has(c)) { filters.categories.delete(c); btn.classList.remove('active'); }
+      else { filters.categories.add(c); btn.classList.add('active'); }
+      applyAndRender();
+    });
+    catWrap.appendChild(btn);
+  });
+
+  const devSet = new Set();
+  games.forEach(g => (g.developers||[]).forEach(d => devSet.add(d)));
+  const devSel = document.getElementById('dev-select');
+  devSel.innerHTML = '<option value="">すべて</option>';
+  [...devSet].sort((a,b)=>a.localeCompare(b,'ja')).forEach(d => {
+    const o = document.createElement('option'); o.value=d; o.textContent=d; devSel.appendChild(o);
+  });
+
+  const pubSet = new Set();
+  games.forEach(g => (g.publishers||[]).forEach(p => pubSet.add(p)));
+  const pubSel = document.getElementById('pub-select');
+  pubSel.innerHTML = '<option value="">すべて</option>';
+  [...pubSet].sort((a,b)=>a.localeCompare(b,'ja')).forEach(p => {
+    const o = document.createElement('option'); o.value=p; o.textContent=p; pubSel.appendChild(o);
+  });
+}
+
+// =====================================================
+// 描画
+// =====================================================
+const PAGE_SIZE = 100;
+let masterGames    = [];
+let displayGames   = [];
+let displayedCount = 0;
+
+function formatPrice(yen) {
+  if (yen === 0) return '無料';
+  return '¥' + Math.floor(yen).toLocaleString('ja-JP');
+}
+
+function createCard(game, idx) {
+  const a = document.createElement('a');
+  a.className = 'game-card';
+  a.href = game.store_url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.animationDelay = `${idx * 0.007}s`;
+
+  const badgeColor = discountColor(game.discount_pct);
+  const genreStr   = (game.genres||[]).slice(0,2).join(' / ') || '—';
+
+  a.innerHTML = `
+    <div class="thumb-wrap">
+      <img src="${game.img_url}" alt="${game.name}" loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="img-fallback">${game.name}<span style="font-size:9px;margin-top:4px;">画像なし</span></div>
+      ${game.japanese ? '<div class="jp-badge">🇯🇵 日本語</div>' : ''}
+      <div class="steam-link-hint">Steamで見る →</div>
+    </div>
+    <div class="card-body">
+      <div class="game-name">${game.name}</div>
+      <div class="price-row">
+        <div class="discount-badge" style="background:${badgeColor};">-${game.discount_pct}%</div>
+        <div class="price-block">
+          <div class="original-price">${formatPrice(game.original_price)}</div>
+          <div class="sale-price">${formatPrice(game.final_price)}</div>
+        </div>
+      </div>
+      <div class="card-meta">
+        <span class="card-genre">${genreStr}</span>
+        <span style="flex-shrink:0;color:var(--text-dim);">${game.release_date||'—'}</span>
+      </div>
+    </div>`;
+  return a;
+}
+
+function renderNextPage() {
+  const grid = document.getElementById('game-grid');
+  const end  = Math.min(displayedCount + PAGE_SIZE, displayGames.length);
+  const frag = document.createDocumentFragment();
+  for (let i = displayedCount; i < end; i++) {
+    frag.appendChild(createCard(displayGames[i], i - displayedCount));
+  }
+  grid.appendChild(frag);
+  displayedCount = end;
+
+  document.getElementById('count-badge').textContent =
+    `${displayedCount} 件表示中 / 全 ${displayGames.length} 件`;
+
+  const btn  = document.getElementById('load-more-btn');
+  const info = document.getElementById('load-more-info');
+  if (displayedCount >= displayGames.length) {
+    btn.classList.remove('visible');
+    info.textContent = 'すべてのタイトルを表示しました';
+  } else {
+    btn.classList.add('visible');
+    btn.disabled = false;
+    info.textContent = `残り ${displayGames.length - displayedCount} 件`;
+  }
+}
+
+function applyAndRender() {
+  const filtered = applyFilters(masterGames);
+  displayGames   = sortGames(filtered, currentSort);
+  displayedCount = 0;
+  document.getElementById('game-grid').innerHTML = '';
+
+  if (displayGames.length === 0) {
+    document.getElementById('count-badge').textContent = '0 件';
+    document.getElementById('load-more-info').textContent = '条件に合うタイトルがありません';
+    document.getElementById('load-more-btn').classList.remove('visible');
+  } else {
+    renderNextPage();
+  }
+}
+
+// =====================================================
+// データ読み込み
+// =====================================================
+function setStatus(msg, type='') {
+  const bar = document.getElementById('status-bar');
+  bar.textContent = msg;
+  bar.className = 'visible ' + type;
+}
+
+async function loadData() {
+  const btn = document.getElementById('fetch-btn');
+  btn.disabled = true;
+  setStatus('steam_data.json を読み込んでいます...', '');
+
+  try {
+    const res = await fetch('steam_data.json?t=' + Date.now());
+    if (!res.ok) throw new Error(`ファイルが見つかりません (${res.status})`);
+    const data = await res.json();
+
+    masterGames = data.games || [];
+    if (masterGames.length === 0) throw new Error('データが空です');
+
+    document.getElementById('last-updated').textContent = data.fetched_at || '—';
+    document.getElementById('empty-state').style.display = 'none';
+
+    buildFilterButtons(masterGames);
+    currentSort = 'discount_desc';
+    updateSortUI(currentSort);
+    applyAndRender();
+
+    const jpCount = masterGames.filter(g => g.japanese).length;
+    setStatus(`${masterGames.length} 件読み込み完了（うち日本語対応 ${jpCount} 件）`, 'ok');
+    setTimeout(() => document.getElementById('status-bar').classList.remove('visible'), 4000);
+
+  } catch (e) {
+    setStatus(
+      `読み込みエラー: ${e.message}　→　先に fetch_steam.py を実行してください`,
+      'error'
+    );
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('load-more-btn').addEventListener('click', () => {
+  renderNextPage();
+  window.scrollBy({ top: 300, behavior: 'smooth' });
+});
+
+loadData();
+</script>
+</body>
+</html>
