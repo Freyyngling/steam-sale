@@ -34,7 +34,6 @@
       radial-gradient(ellipse at 80% 0%, rgba(129,140,248,0.06) 0%, transparent 60%);
   }
 
-  /* ヘッダー */
   header {
     background: linear-gradient(180deg, #0f1929 0%, #111827 100%);
     border-bottom: 1px solid var(--border);
@@ -126,7 +125,6 @@
   #status-bar.error { color: #f87171; }
   #status-bar.ok { color: var(--accent); }
 
-  /* ソートバー */
   .sort-bar {
     background: var(--surface2);
     border-bottom: 1px solid var(--border);
@@ -181,7 +179,6 @@
     font-weight: 500;
   }
 
-  /* フィルターパネル */
   .filter-panel {
     background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
     border-bottom: 1px solid var(--border);
@@ -207,11 +204,7 @@
     flex-shrink: 0;
   }
 
-  .slider-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .slider-group { display: flex; align-items: center; gap: 8px; }
 
   input[type=range] {
     -webkit-appearance: none;
@@ -224,8 +217,7 @@
   }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
+    width: 16px; height: 16px;
     border-radius: 50%;
     background: var(--accent);
     cursor: pointer;
@@ -287,7 +279,6 @@
   }
   .filter-reset-btn:hover { border-color: #f87171; color: #f87171; }
 
-  /* メイン */
   main {
     max-width: 1280px;
     margin: 0 auto;
@@ -333,7 +324,7 @@
   #empty-state p { font-size: 14px; line-height: 2.2; }
   #empty-state strong { color: var(--text); }
 
-  /* ===================== 割引帯セパレーター ===================== */
+  /* 割引帯 */
   .discount-band {
     width: 100%;
     margin: 8px 0 16px 0;
@@ -357,7 +348,6 @@
     font-family: 'Rajdhani', sans-serif;
     font-size: 20px;
     font-weight: 700;
-    color: #fff;
     letter-spacing: 1px;
     text-shadow: 0 2px 6px rgba(0,0,0,0.4);
     white-space: nowrap;
@@ -381,12 +371,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     gap: 16px;
-    padding: 0 12px 16px 12px;
+    padding: 12px 12px 16px 12px;
     background: rgba(0,0,0,0.15);
   }
   .band-grid.hidden { display: none; }
 
-  /* ===================== カード ===================== */
+  /* カード */
   .game-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -421,8 +411,7 @@
   }
 
   .game-card img {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: cover;
     display: block;
     transition: transform 0.22s ease;
@@ -454,8 +443,7 @@
 
   .jp-badge {
     position: absolute;
-    top: 7px;
-    left: 7px;
+    top: 7px; left: 7px;
     background: rgba(251,191,36,0.92);
     color: #000;
     font-size: 10px;
@@ -468,8 +456,7 @@
 
   .steam-link-hint {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
+    bottom: 8px; right: 8px;
     background: rgba(0,0,0,0.8);
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 4px;
@@ -552,7 +539,7 @@
     opacity: 0.8;
   }
 
-  /* もっと見る（帯内） */
+  /* 帯内もっと見る */
   .band-load-more {
     text-align: center;
     padding: 12px;
@@ -575,7 +562,6 @@
   }
   .band-load-more-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* データ注記 */
   .data-note {
     margin-top: 56px;
     padding: 20px 24px;
@@ -606,7 +592,6 @@
 
 <div id="status-bar"></div>
 
-<!-- ソートバー -->
 <div class="sort-bar">
   <span class="bar-label">並び替え</span>
   <select class="sort-select active" id="sort-discount" onchange="onSelectSort('discount', this)">
@@ -627,7 +612,6 @@
   <button class="sort-btn" data-sort="relevance">適合性</button>
 </div>
 
-<!-- フィルターパネル -->
 <div class="filter-panel">
   <div class="filter-row">
     <span class="filter-section-label">価格上限</span>
@@ -691,19 +675,19 @@
 // =====================================================
 // 設定
 // =====================================================
-const BAND_PAGE_SIZE = 50; // 各帯の初期表示件数
+const BAND_PAGE_SIZE = 50;
 
 const BANDS = [
-  { min: 90, max: 100, label: '90% 以上',     color: '#e03030' },
-  { min: 80, max: 89,  label: '80 〜 89%',    color: '#e06520' },
-  { min: 70, max: 79,  label: '70 〜 79%',    color: '#e09020' },
-  { min: 60, max: 69,  label: '60 〜 69%',    color: '#c8b520' },
-  { min: 50, max: 59,  label: '50 〜 59%',    color: '#90c020' },
-  { min: 40, max: 49,  label: '40 〜 49%',    color: '#40b840' },
-  { min: 30, max: 39,  label: '30 〜 39%',    color: '#20a880' },
-  { min: 20, max: 29,  label: '20 〜 29%',    color: '#2090c8' },
-  { min: 10, max: 19,  label: '10 〜 19%',    color: '#2060e0' },
-  { min: 0,  max: 9,   label: '10% 未満',     color: '#3040c0' },
+  { min: 90, max: 100, label: '90% 以上',  color: '#e03030' },
+  { min: 80, max: 89,  label: '80 〜 89%', color: '#e06520' },
+  { min: 70, max: 79,  label: '70 〜 79%', color: '#e09020' },
+  { min: 60, max: 69,  label: '60 〜 69%', color: '#c8b520' },
+  { min: 50, max: 59,  label: '50 〜 59%', color: '#90c020' },
+  { min: 40, max: 49,  label: '40 〜 49%', color: '#40b840' },
+  { min: 30, max: 39,  label: '30 〜 39%', color: '#20a880' },
+  { min: 20, max: 29,  label: '20 〜 29%', color: '#2090c8' },
+  { min: 10, max: 19,  label: '10 〜 19%', color: '#2060e0' },
+  { min: 0,  max: 9,   label: '10% 未満',  color: '#3040c0' },
 ];
 
 function discountColor(pct) {
@@ -741,9 +725,9 @@ function updateSortUI(activeKey) {
   const dA = activeKey==='discount_desc'||activeKey==='discount_asc';
   const pA = activeKey==='price_asc'||activeKey==='price_desc';
   const rA = activeKey==='release_desc'||activeKey==='release_asc';
-  dSel.classList.toggle('active', dA); if(dA) dSel.value=activeKey; else dSel.value='discount_desc';
-  pSel.classList.toggle('active', pA); if(pA) pSel.value=activeKey; else pSel.value='';
-  rSel.classList.toggle('active', rA); if(rA) rSel.value=activeKey; else rSel.value='';
+  dSel.classList.toggle('active', dA); dSel.value = dA ? activeKey : 'discount_desc';
+  pSel.classList.toggle('active', pA); pSel.value = pA ? activeKey : '';
+  rSel.classList.toggle('active', rA); rSel.value = rA ? activeKey : '';
 }
 
 function onSelectSort(type, sel) {
@@ -862,14 +846,16 @@ function buildFilterButtons(games) {
     catWrap.appendChild(btn);
   });
 
-  const devSet=new Set(); games.forEach(g=>(g.developers||[]).forEach(d=>devSet.add(d)));
+  const devSet=new Set();
+  games.forEach(g=>(g.developers||[]).forEach(d=>devSet.add(d)));
   const devSel=document.getElementById('dev-select');
   devSel.innerHTML='<option value="">すべて</option>';
   [...devSet].sort((a,b)=>a.localeCompare(b,'ja')).forEach(d=>{
     const o=document.createElement('option'); o.value=d; o.textContent=d; devSel.appendChild(o);
   });
 
-  const pubSet=new Set(); games.forEach(g=>(g.publishers||[]).forEach(p=>pubSet.add(p)));
+  const pubSet=new Set();
+  games.forEach(g=>(g.publishers||[]).forEach(p=>pubSet.add(p)));
   const pubSel=document.getElementById('pub-select');
   pubSel.innerHTML='<option value="">すべて</option>';
   [...pubSet].sort((a,b)=>a.localeCompare(b,'ja')).forEach(p=>{
@@ -881,25 +867,25 @@ function buildFilterButtons(games) {
 // カード生成
 // =====================================================
 function formatPrice(yen) {
-  if (yen===0) return '無料';
-  return '¥'+Math.floor(yen).toLocaleString('ja-JP');
+  if (yen === 0) return '無料';
+  return '¥' + Math.floor(yen).toLocaleString('ja-JP');
 }
 
 function createCard(game, idx) {
-  const a=document.createElement('a');
-  a.className='game-card';
-  a.href=game.store_url;
-  a.target='_blank';
-  a.rel='noopener noreferrer';
-  a.style.animationDelay=`${idx*0.007}s`;
-  const badgeColor=discountColor(game.discount_pct);
-  const genreStr=(game.genres||[]).slice(0,2).join(' / ')||'—';
-  a.innerHTML=`
+  const a = document.createElement('a');
+  a.className = 'game-card';
+  a.href = game.store_url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.animationDelay = `${idx * 0.007}s`;
+  const badgeColor = discountColor(game.discount_pct);
+  const genreStr = (game.genres||[]).slice(0,2).join(' / ') || '—';
+  a.innerHTML = `
     <div class="thumb-wrap">
       <img src="${game.img_url}" alt="${game.name}" loading="lazy"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
       <div class="img-fallback">${game.name}<span style="font-size:9px;margin-top:4px;">画像なし</span></div>
-      ${game.japanese?'<div class="jp-badge">🇯🇵 日本語</div>':''}
+      ${game.japanese ? '<div class="jp-badge">🇯🇵 日本語</div>' : ''}
       <div class="steam-link-hint">Steamで見る →</div>
     </div>
     <div class="card-body">
@@ -920,93 +906,80 @@ function createCard(game, idx) {
 }
 
 // =====================================================
-// 帯レンダリング
+// 帯レンダリング（moreWrap修正済み）
 // =====================================================
 function renderBands(games) {
   const grid = document.getElementById('game-grid');
   grid.innerHTML = '';
-
   let totalDisplayed = 0;
 
-  BANDS.forEach((band, bi) => {
+  BANDS.forEach(band => {
     const bandGames = games.filter(g => g.discount_pct >= band.min && g.discount_pct <= band.max);
     if (bandGames.length === 0) return;
-
     totalDisplayed += bandGames.length;
 
-    // 帯ラッパー
     const wrapper = document.createElement('div');
     wrapper.className = 'discount-band';
     wrapper.style.borderColor = band.color + '33';
 
-    // 帯ヘッダー
     const header = document.createElement('div');
     header.className = 'band-header';
     header.style.background = `linear-gradient(135deg, ${band.color}33, ${band.color}18)`;
     header.style.borderBottom = `1px solid ${band.color}44`;
-
     header.innerHTML = `
       <span class="band-pct-label" style="color:${band.color};">-${band.label}</span>
       <span class="band-count">${bandGames.length} タイトル</span>
       <span class="band-toggle-icon">▼</span>
     `;
 
-    // 帯グリッド
     const bandGrid = document.createElement('div');
     bandGrid.className = 'band-grid';
 
-    // 初期表示
+    // もっと見るエリアを先に宣言
+    const moreWrap = document.createElement('div');
+    moreWrap.className = 'band-load-more';
+    moreWrap.style.display = 'none';
+
+    const moreBtn = document.createElement('button');
+    moreBtn.className = 'band-load-more-btn';
+    moreBtn.style.borderColor = band.color + '88';
+    moreBtn.style.color = band.color;
+    moreWrap.appendChild(moreBtn);
+
     let shown = 0;
+
     const showMore = () => {
       const end = Math.min(shown + BAND_PAGE_SIZE, bandGames.length);
       for (let i = shown; i < end; i++) {
         bandGrid.appendChild(createCard(bandGames[i], i));
       }
       shown = end;
-
-      // もっと見るボタン更新
-      if (moreWrap) {
-        if (shown >= bandGames.length) {
-          moreWrap.remove();
-        } else {
-          moreBtn.textContent = `+ MORE  (${bandGames.length - shown} remaining)`;
-        }
+      if (shown >= bandGames.length) {
+        moreWrap.style.display = 'none';
+      } else {
+        moreWrap.style.display = 'block';
+        moreBtn.textContent = `+ MORE  (残り ${bandGames.length - shown} 件)`;
       }
     };
 
+    moreBtn.addEventListener('click', showMore);
     showMore();
 
-    // もっと見るボタン（帯内）
-    let moreWrap = null;
-    let moreBtn = null;
-    if (bandGames.length > BAND_PAGE_SIZE) {
-      moreWrap = document.createElement('div');
-      moreWrap.className = 'band-load-more';
-      moreBtn = document.createElement('button');
-      moreBtn.className = 'band-load-more-btn';
-      moreBtn.textContent = `+ MORE  (${bandGames.length - shown} remaining)`;
-      moreBtn.style.borderColor = band.color + '88';
-      moreBtn.style.color = band.color;
-      moreBtn.addEventListener('click', showMore);
-      moreWrap.appendChild(moreBtn);
-    }
-
-    // 帯の折りたたみ
+    // 折りたたみ
     let collapsed = false;
     header.addEventListener('click', () => {
       collapsed = !collapsed;
       bandGrid.classList.toggle('hidden', collapsed);
-      if (moreWrap) moreWrap.style.display = collapsed ? 'none' : '';
+      moreWrap.style.display = collapsed ? 'none' : (shown < bandGames.length ? 'block' : 'none');
       header.querySelector('.band-toggle-icon').classList.toggle('collapsed', collapsed);
     });
 
     wrapper.appendChild(header);
     wrapper.appendChild(bandGrid);
-    if (moreWrap) wrapper.appendChild(moreWrap);
+    wrapper.appendChild(moreWrap);
     grid.appendChild(wrapper);
   });
 
-  // カウント更新
   document.getElementById('count-badge').textContent =
     `${totalDisplayed} 件 / 全 ${games.length} 件`;
 }
@@ -1019,13 +992,11 @@ let masterGames = [];
 function applyAndRender() {
   const filtered = applyFilters(masterGames);
   const sorted   = sortGames(filtered, currentSort);
-
   if (sorted.length === 0) {
     document.getElementById('game-grid').innerHTML = '';
     document.getElementById('count-badge').textContent = '0 件';
     return;
   }
-
   renderBands(sorted);
 }
 
@@ -1033,34 +1004,34 @@ function applyAndRender() {
 // データ読み込み
 // =====================================================
 function setStatus(msg, type='') {
-  const bar=document.getElementById('status-bar');
-  bar.textContent=msg;
-  bar.className='visible '+type;
+  const bar = document.getElementById('status-bar');
+  bar.textContent = msg;
+  bar.className = 'visible ' + type;
 }
 
 async function loadData() {
-  const btn=document.getElementById('fetch-btn');
-  btn.disabled=true;
-  setStatus('steam_data.json を読み込んでいます...','');
+  const btn = document.getElementById('fetch-btn');
+  btn.disabled = true;
+  setStatus('steam_data.json を読み込んでいます...', '');
   try {
-    const res=await fetch('steam_data.json?t='+Date.now());
-    if(!res.ok) throw new Error(`ファイルが見つかりません (${res.status})`);
-    const data=await res.json();
-    masterGames=data.games||[];
-    if(masterGames.length===0) throw new Error('データが空です');
-    document.getElementById('last-updated').textContent=data.fetched_at||'—';
-    document.getElementById('empty-state').style.display='none';
+    const res = await fetch('steam_data.json?t=' + Date.now());
+    if (!res.ok) throw new Error(`ファイルが見つかりません (${res.status})`);
+    const data = await res.json();
+    masterGames = data.games || [];
+    if (masterGames.length === 0) throw new Error('データが空です');
+    document.getElementById('last-updated').textContent = data.fetched_at || '—';
+    document.getElementById('empty-state').style.display = 'none';
     buildFilterButtons(masterGames);
-    currentSort='discount_desc';
+    currentSort = 'discount_desc';
     updateSortUI(currentSort);
     applyAndRender();
-    const jpCount=masterGames.filter(g=>g.japanese).length;
-    setStatus(`${masterGames.length} 件読み込み完了（うち日本語対応 ${jpCount} 件）`,'ok');
-    setTimeout(()=>document.getElementById('status-bar').classList.remove('visible'),4000);
+    const jpCount = masterGames.filter(g => g.japanese).length;
+    setStatus(`${masterGames.length} 件読み込み完了（うち日本語対応 ${jpCount} 件）`, 'ok');
+    setTimeout(() => document.getElementById('status-bar').classList.remove('visible'), 4000);
   } catch(e) {
-    setStatus(`読み込みエラー: ${e.message}　→　先に fetch_steam.py を実行してください`,'error');
+    setStatus(`読み込みエラー: ${e.message}　→　先に fetch_steam.py を実行してください`, 'error');
   } finally {
-    btn.disabled=false;
+    btn.disabled = false;
   }
 }
 
