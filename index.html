@@ -625,7 +625,8 @@
 <div class="sort-bar">
   <span class="bar-label">並び替え</span>
   <select class="sort-select active" id="sort-discount" onchange="onSelectSort('discount', this)">
-    <option value="discount_desc" selected>割引率 高い順</option>
+    <option value="">割引率で並び替え</option>
+    <option value="discount_desc">割引率 高い順</option>
     <option value="discount_asc">割引率 低い順</option>
   </select>
   <select class="sort-select" id="sort-price" onchange="onSelectSort('price', this)">
@@ -768,7 +769,7 @@ function updateSortUI(activeKey) {
   const dA = activeKey==='discount_desc'||activeKey==='discount_asc';
   const pA = activeKey==='price_asc'||activeKey==='price_desc';
   const rA = activeKey==='release_desc'||activeKey==='release_asc';
-  dSel.classList.toggle('active', dA); dSel.value = dA ? activeKey : 'discount_desc';
+  dSel.classList.toggle('active', dA); dSel.value = dA ? activeKey : '';
   pSel.classList.toggle('active', pA); pSel.value = pA ? activeKey : '';
   rSel.classList.toggle('active', rA); rSel.value = rA ? activeKey : '';
 }
@@ -1124,6 +1125,7 @@ async function loadData() {
     buildFilterButtons(masterGames);
     currentSort = 'discount_desc';
     updateSortUI(currentSort);
+    document.getElementById('sort-discount').value = 'discount_desc';
     applyAndRender();
     const jpCount = masterGames.filter(g => g.japanese).length;
     setStatus(`${masterGames.length} 件読み込み完了（うち日本語対応 ${jpCount} 件）`, 'ok');
