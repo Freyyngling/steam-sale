@@ -64,7 +64,6 @@
     background-clip: text;
     white-space: nowrap;
   }
-
   .logo-sep { color: var(--border-bright); -webkit-text-fill-color: var(--border-bright); font-weight: 300; }
 
   .header-notice {
@@ -376,6 +375,13 @@
   }
   .band-grid.hidden { display: none; }
 
+  /* 通常グリッド（帯なし） */
+  #plain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+  }
+
   /* カード */
   .game-card {
     background: var(--surface);
@@ -562,6 +568,30 @@
   }
   .band-load-more-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+  /* 通常グリッドのもっと見る */
+  .load-more-wrap { text-align: center; margin-top: 40px; }
+
+  #load-more-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 14px 52px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    display: none;
+  }
+  #load-more-btn.visible { display: inline-block; }
+  #load-more-btn:hover { background: rgba(56,189,248,0.1); box-shadow: 0 0 24px rgba(56,189,248,0.25); }
+  #load-more-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .load-more-info { margin-top: 12px; font-size: 12px; color: var(--text-dim); }
+
   .data-note {
     margin-top: 56px;
     padding: 20px 24px;
@@ -659,12 +689,19 @@
     <p><strong>steam_data.json を読み込んでいます...</strong><br>表示されない場合は先に fetch_steam.py を実行してください</p>
   </div>
 
+  <!-- 割引率ソート時の帯表示 -->
   <div id="game-grid"></div>
+
+  <!-- その他ソート時の通常グリッド -->
+  <div id="plain-grid"></div>
+  <div class="load-more-wrap">
+    <button id="load-more-btn">さらに下へ</button>
+    <div class="load-more-info" id="load-more-info"></div>
+  </div>
 
   <div class="data-note">
     <strong>⚠ 価格についてのご注意</strong>
     <p>
-      このページに表示されている価格・割引率は、fetch_steam.py を実行してデータを取得した時点のものです。<br>
       セールはいつでも終了する可能性があり、表示されている価格と Steam ストアの実際の価格が異なる場合があります。<br>
       購入を検討される際は、必ず Steam ストアのページで最新の価格をご確認ください。
     </p>
@@ -675,7 +712,8 @@
 // =====================================================
 // 設定
 // =====================================================
-const BAND_PAGE_SIZE = 50;
+const BAND_PAGE_SIZE  = 50;
+const PLAIN_PAGE_SIZE = 100;
 
 const BANDS = [
   { min: 90, max: 100, label: '90% 以上',  color: '#e03030' },
@@ -693,6 +731,11 @@ const BANDS = [
 function discountColor(pct) {
   for (const b of BANDS) { if (pct >= b.min) return b.color; }
   return '#3040c0';
+}
+
+// 割引率ソートかどうか
+function isDiscountSort(key) {
+  return key === 'discount_desc' || key === 'discount_asc';
 }
 
 // =====================================================
@@ -906,14 +949,21 @@ function createCard(game, idx) {
 }
 
 // =====================================================
-// 帯レンダリング（moreWrap修正済み）
+// 帯レンダリング（割引率ソート時のみ）
 // =====================================================
-function renderBands(games) {
+function renderBands(games, ascending) {
   const grid = document.getElementById('game-grid');
   grid.innerHTML = '';
+  document.getElementById('plain-grid').innerHTML = '';
+  document.getElementById('load-more-btn').classList.remove('visible');
+  document.getElementById('load-more-info').textContent = '';
+
+  // 低い順の時はBANDSを逆順に
+  const bands = ascending ? [...BANDS].reverse() : BANDS;
+
   let totalDisplayed = 0;
 
-  BANDS.forEach(band => {
+  bands.forEach(band => {
     const bandGames = games.filter(g => g.discount_pct >= band.min && g.discount_pct <= band.max);
     if (bandGames.length === 0) return;
     totalDisplayed += bandGames.length;
@@ -935,7 +985,6 @@ function renderBands(games) {
     const bandGrid = document.createElement('div');
     bandGrid.className = 'band-grid';
 
-    // もっと見るエリアを先に宣言
     const moreWrap = document.createElement('div');
     moreWrap.className = 'band-load-more';
     moreWrap.style.display = 'none';
@@ -947,7 +996,6 @@ function renderBands(games) {
     moreWrap.appendChild(moreBtn);
 
     let shown = 0;
-
     const showMore = () => {
       const end = Math.min(shown + BAND_PAGE_SIZE, bandGames.length);
       for (let i = shown; i < end; i++) {
@@ -965,7 +1013,6 @@ function renderBands(games) {
     moreBtn.addEventListener('click', showMore);
     showMore();
 
-    // 折りたたみ
     let collapsed = false;
     header.addEventListener('click', () => {
       collapsed = !collapsed;
@@ -985,6 +1032,42 @@ function renderBands(games) {
 }
 
 // =====================================================
+// 通常グリッドレンダリング（割引率以外のソート時）
+// =====================================================
+let plainGames = [];
+let plainShown = 0;
+
+function renderPlainNext() {
+  const grid = document.getElementById('plain-grid');
+  const end = Math.min(plainShown + PLAIN_PAGE_SIZE, plainGames.length);
+  const frag = document.createDocumentFragment();
+  for (let i = plainShown; i < end; i++) {
+    frag.appendChild(createCard(plainGames[i], i - plainShown));
+  }
+  grid.appendChild(frag);
+  plainShown = end;
+
+  document.getElementById('count-badge').textContent =
+    `${plainShown} 件表示中 / 全 ${plainGames.length} 件`;
+
+  const btn  = document.getElementById('load-more-btn');
+  const info = document.getElementById('load-more-info');
+  if (plainShown >= plainGames.length) {
+    btn.classList.remove('visible');
+    info.textContent = 'すべてのタイトルを表示しました';
+  } else {
+    btn.classList.add('visible');
+    btn.disabled = false;
+    info.textContent = `残り ${plainGames.length - plainShown} 件`;
+  }
+}
+
+document.getElementById('load-more-btn').addEventListener('click', () => {
+  renderPlainNext();
+  window.scrollBy({ top: 300, behavior: 'smooth' });
+});
+
+// =====================================================
 // メインレンダリング
 // =====================================================
 let masterGames = [];
@@ -992,12 +1075,29 @@ let masterGames = [];
 function applyAndRender() {
   const filtered = applyFilters(masterGames);
   const sorted   = sortGames(filtered, currentSort);
+
   if (sorted.length === 0) {
     document.getElementById('game-grid').innerHTML = '';
+    document.getElementById('plain-grid').innerHTML = '';
     document.getElementById('count-badge').textContent = '0 件';
+    document.getElementById('load-more-btn').classList.remove('visible');
     return;
   }
-  renderBands(sorted);
+
+  if (isDiscountSort(currentSort)) {
+    // 帯表示
+    document.getElementById('plain-grid').innerHTML = '';
+    document.getElementById('load-more-btn').classList.remove('visible');
+    document.getElementById('load-more-info').textContent = '';
+    renderBands(sorted, currentSort === 'discount_asc');
+  } else {
+    // 通常グリッド表示
+    document.getElementById('game-grid').innerHTML = '';
+    plainGames = sorted;
+    plainShown = 0;
+    document.getElementById('plain-grid').innerHTML = '';
+    renderPlainNext();
+  }
 }
 
 // =====================================================
