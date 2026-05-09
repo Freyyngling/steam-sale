@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta name="robots" content="noindex, nofollow, noarchive">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Steam セール — 割引率順</title>
@@ -66,6 +65,98 @@
     white-space: nowrap;
   }
   .logo-sep { color: var(--border-bright); -webkit-text-fill-color: var(--border-bright); font-weight: 300; }
+
+  /* ===================== サイトタイトル ===================== */
+  .site-title-wrap {
+    text-align: center;
+    padding: 24px 32px 16px 32px;
+    border-bottom: 1px solid rgba(56,189,248,0.08);
+  }
+
+  .site-title {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    background: linear-gradient(90deg, #38bdf8, #818cf8, #38bdf8, #06b6d4, #818cf8);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleGradient 5s ease infinite;
+    text-shadow: none;
+    display: inline-block;
+  }
+
+  @keyframes titleGradient {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ===================== お知らせ欄 ===================== */
+  .news-bar {
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(239,68,68,0.2);
+    padding: 0;
+    overflow: hidden;
+    height: 34px;
+    display: flex;
+    align-items: center;
+  }
+
+  .news-label {
+    background: linear-gradient(135deg, #dc2626, #f97316);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 0 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .news-track {
+    overflow: hidden;
+    flex: 1;
+    height: 100%;
+    position: relative;
+  }
+
+  .news-content {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    animation: newsScroll 30s linear infinite;
+  }
+
+  .news-content:hover { animation-play-state: paused; }
+
+  .news-item {
+    font-size: 12px;
+    padding: 0 40px;
+    background: linear-gradient(90deg, #fca5a5, #f97316, #fbbf24, #f97316, #fca5a5);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: newsGradient 4s ease infinite;
+  }
+
+  @keyframes newsGradient {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes newsScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 
   .header-notice {
     font-size: 12px;
@@ -607,6 +698,29 @@
 <body>
 
 <header>
+  <!-- タイトル -->
+  <div class="site-title-wrap">
+    <div class="site-title">Steam セール観測所</div>
+  </div>
+
+  <!-- お知らせ -->
+  <div class="news-bar">
+    <div class="news-label">NEWS</div>
+    <div class="news-track">
+      <div class="news-content" id="news-content">
+        <!-- ここにお知らせを追加してください。同じ内容を2回書くとループがつながります -->
+        <span class="news-item">⚠️ 更新は手動で行っています。更新のタイミングは完全に気まぐれです。</span>
+        <span class="news-item">📌 現在STEAMデッキ構成フェスが5月11日までやっているようなので次、更新するとすればそれ以降だと思います。</span>
+        <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
+        <!-- ループ用（同じ内容をもう一度） -->
+        <span class="news-item">⚠️ 更新は手動で行っています。更新のタイミングは完全に気まぐれです。</span>
+        <span class="news-item">📌 現在STEAMデッキ構成フェスが5月11日までやっているようなので次、更新するとすればそれ以降だと思います。</span>
+        <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作バー -->
   <div class="header-top">
     <div class="logo">Steam<span class="logo-sep"> / </span>Sale</div>
     <div class="header-right">
@@ -615,9 +729,6 @@
         取得日時：<span id="last-updated">—</span>
       </div>
     </div>
-  </div>
-  <div class="header-notice">
-    ⚠️ データ取得日時と実際の表示時間には差がある場合があります。セールが終了して価格が変わっている可能性もありますので、購入前に必ず Steam ストアで価格をご確認ください。
   </div>
 </header>
 
@@ -770,7 +881,7 @@ function updateSortUI(activeKey) {
   const dA = activeKey==='discount_desc'||activeKey==='discount_asc';
   const pA = activeKey==='price_asc'||activeKey==='price_desc';
   const rA = activeKey==='release_desc'||activeKey==='release_asc';
-  dSel.classList.toggle('active', dA); dSel.value = dA ? activeKey : '';
+  dSel.classList.toggle('active', dA); if(dA){ dSel.value = activeKey; } else { dSel.selectedIndex = 0; }
   pSel.classList.toggle('active', pA); pSel.value = pA ? activeKey : '';
   rSel.classList.toggle('active', rA); rSel.value = rA ? activeKey : '';
 }
