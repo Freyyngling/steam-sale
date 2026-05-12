@@ -1,9 +1,8 @@
 // =====================================================
-// Steam セール観測所 - キャラクターシステム
-// pet.js  v3
+// Steam セール観測所 - キャラクターシステム v4
 // =====================================================
 
-// ★ 吹き出しコメントはここを編集してください ★
+// ★ 吹き出しコメントはここを編集 ★
 const MESSAGES = [
   "このセール、見逃したら絶対後悔するよ！",
   "割引率90%以上のゲームがあるよ！急いで！",
@@ -43,14 +42,13 @@ const IMGS = {
 const PET_SIZE         = 150;
 const PET_SPEED        = 1.5;
 const ACTION_RETURN_MS = 10000;
+const DROP_HIT_MARGIN  = 40; // 判定の余裕（px）
 
-// ドロップゾーン定義
 const DROP_ZONE_DEFS = [
   { id: 'dz-book', action: 'book', img: 'desk_aicon.png', label: '調べる' },
   { id: 'dz-game', action: 'game', img: 'TV_aicon.png',   label: 'ゲーム' },
 ];
 
-// 状態変数
 let petEl     = null;
 let bubbleEl  = null;
 let toggleBtn = null;
@@ -66,18 +64,15 @@ let animFrame   = null;
 let idleTimer   = null;
 let actionAnim  = null;
 let isDragging  = false;
+let dragOffX = 0, dragOffY = 0;
 
 // =====================================================
-// DOM構築
+// キャラクターDOM
 // =====================================================
 function buildPetDOM() {
   const wrapper = document.createElement('div');
   wrapper.id = 'pet-wrapper';
-  wrapper.style.cssText = `
-    position:fixed; inset:0;
-    pointer-events:none;
-    z-index:9000;
-  `;
+  wrapper.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9000;';
 
   petEl = document.createElement('img');
   petEl.id = 'pet-char';
@@ -85,15 +80,12 @@ function buildPetDOM() {
   petEl.draggable = false;
   petEl.style.cssText = `
     position:absolute;
-    width:${PET_SIZE}px; height:${PET_SIZE}px;
-    object-fit:contain;
-    image-rendering:pixelated;
-    left:${posX}px; top:${posY}px;
-    cursor:grab;
-    pointer-events:auto;
+    width:${PET_SIZE}px;height:${PET_SIZE}px;
+    object-fit:contain;image-rendering:pixelated;
+    left:${posX}px;top:${posY}px;
+    cursor:grab;pointer-events:auto;
     filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-    user-select:none;
-    -webkit-user-drag:none;
+    user-select:none;-webkit-user-drag:none;
   `;
 
   bubbleEl = document.createElement('div');
@@ -102,18 +94,12 @@ function buildPetDOM() {
     position:absolute;
     background:rgba(15,18,35,0.96);
     border:1px solid rgba(129,140,248,0.7);
-    border-radius:12px;
-    padding:8px 12px;
-    font-size:12px;
-    font-family:'Noto Sans JP',sans-serif;
-    color:#e2e8f0;
-    max-width:200px;
-    line-height:1.6;
-    pointer-events:none;
-    display:none;
+    border-radius:12px;padding:8px 12px;
+    font-size:12px;font-family:'Noto Sans JP',sans-serif;
+    color:#e2e8f0;max-width:200px;line-height:1.6;
+    pointer-events:none;display:none;
     box-shadow:0 4px 16px rgba(0,0,0,0.5);
-    word-break:break-all;
-    z-index:9002;
+    word-break:break-all;z-index:9002;
   `;
 
   wrapper.appendChild(petEl);
@@ -126,19 +112,12 @@ function buildToggleBtn() {
   toggleBtn.id = 'pet-toggle';
   toggleBtn.textContent = '🌸 消す';
   toggleBtn.style.cssText = `
-    position:fixed;
-    bottom:20px; right:20px;
+    position:fixed;bottom:20px;right:20px;
     background:rgba(15,18,35,0.9);
     border:1px solid rgba(129,140,248,0.5);
-    color:#e2e8f0;
-    font-family:'Noto Sans JP',sans-serif;
-    font-size:12px;
-    padding:6px 14px;
-    border-radius:20px;
-    cursor:pointer;
-    pointer-events:auto;
-    z-index:9003;
-    transition:all 0.15s;
+    color:#e2e8f0;font-family:'Noto Sans JP',sans-serif;
+    font-size:12px;padding:6px 14px;border-radius:20px;
+    cursor:pointer;pointer-events:auto;z-index:9003;transition:all 0.15s;
   `;
   toggleBtn.onmouseenter = () => { toggleBtn.style.borderColor = '#818cf8'; };
   toggleBtn.onmouseleave = () => { toggleBtn.style.borderColor = 'rgba(129,140,248,0.5)'; };
@@ -147,73 +126,72 @@ function buildToggleBtn() {
 }
 
 // =====================================================
-// ドロップゾーン：ソートバーの右側に fixed で配置
+// ドロップゾーン：価格上限バーの右に配置
 // =====================================================
 function buildDropZones() {
-  // ソートバーを取得して位置を計算
-  const sortBar = document.querySelector('.sort-bar');
-
   DROP_ZONE_DEFS.forEach((def, idx) => {
     const wrap = document.createElement('div');
+    wrap.className = 'dz-wrap';
     wrap.style.cssText = `
       position:fixed;
       z-index:200;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:3px;
-      pointer-events:auto;
+      display:flex;flex-direction:column;
+      align-items:center;gap:3px;
+      pointer-events:none;
     `;
 
-    const el = document.createElement('div');
-    el.id = def.id;
-    el.style.cssText = `
-      width:56px; height:56px;
-      border:2px dashed rgba(129,140,248,0.35);
+    const box = document.createElement('div');
+    box.id = def.id;
+    box.style.cssText = `
+      width:60px;height:60px;
+      border:2px dashed rgba(129,140,248,0.4);
       border-radius:10px;
-      display:flex; align-items:center; justify-content:center;
-      background:rgba(10,14,23,0.75);
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(10,14,23,0.8);
       overflow:hidden;
-      transition:border-color 0.15s, background 0.15s, transform 0.15s;
+      transition:border-color 0.15s,background 0.15s,transform 0.15s;
     `;
 
     const img = document.createElement('img');
     img.src = def.img;
     img.className = 'dz-icon';
     img.style.cssText = `
-      width:48px; height:48px;
-      object-fit:contain;
-      image-rendering:pixelated;
+      width:52px;height:52px;
+      object-fit:contain;image-rendering:pixelated;
       transition:opacity 0.15s;
       pointer-events:none;
     `;
 
     const label = document.createElement('span');
     label.textContent = def.label;
-    label.style.cssText = `
-      font-size:9px; color:#64748b;
-      font-family:'Noto Sans JP',sans-serif;
-    `;
+    label.style.cssText = 'font-size:9px;color:#64748b;font-family:"Noto Sans JP",sans-serif;';
 
-    el.appendChild(img);
-    wrap.appendChild(el);
+    box.appendChild(img);
+    wrap.appendChild(box);
     wrap.appendChild(label);
     document.body.appendChild(wrap);
 
-    // ソートバーの右端に配置（ソートバーが描画された後に計算）
+    // 価格上限バーの右側に配置する
     function positionZone() {
-      const sb = document.querySelector('.sort-bar');
-      if (!sb) return;
-      const r = sb.getBoundingClientRect();
-      // 右側2つ並べる
-      const rightOffset = 20 + (DROP_ZONE_DEFS.length - 1 - idx) * 72;
-      wrap.style.top   = (r.top + (r.height - 56) / 2 - 8) + 'px';
-      wrap.style.right = rightOffset + 'px';
+      // 価格上限のfilter-rowを探す
+      const filterRows = document.querySelectorAll('.filter-row');
+      let priceRow = null;
+      filterRows.forEach(row => {
+        if (row.textContent.includes('価格上限')) priceRow = row;
+      });
+
+      if (!priceRow) return;
+      const r = priceRow.getBoundingClientRect();
+      // 右から idx番目に並べる（2つなので右端から60px間隔）
+      const rightPos = 32 + idx * 76;
+      wrap.style.top   = (r.top + (r.height - 60) / 2) + 'px';
+      wrap.style.right = rightPos + 'px';
     }
 
     positionZone();
     window.addEventListener('resize', positionZone);
-    window.addEventListener('scroll', positionZone);
+    // スクロール時に再計算（filter-panelはスクロールで動かない固定ではないので）
+    window.addEventListener('scroll', positionZone, { passive: true });
   });
 }
 
@@ -224,9 +202,8 @@ function togglePet() {
   visible = !visible;
   const w = document.getElementById('pet-wrapper');
   if (w) w.style.display = visible ? '' : 'none';
-  DROP_ZONE_DEFS.forEach(def => {
-    const el = document.getElementById(def.id);
-    if (el && el.parentElement) el.parentElement.style.display = visible ? '' : 'none';
+  document.querySelectorAll('.dz-wrap').forEach(el => {
+    el.style.display = visible ? '' : 'none';
   });
   toggleBtn.textContent = visible ? '🌸 消す' : '🌸 出す';
   if (visible) startWalk();
@@ -320,36 +297,41 @@ function goIdle() {
 }
 
 // =====================================================
-// アクション
+// アクション（フリーズしないよう確実にアニメーション）
 // =====================================================
 function doAction(type) {
-  if (state === 'action') return;
-  state = 'action';
-  stopBlink();
+  // 既存アクションをクリア
+  clearInterval(actionAnim);
   clearTimeout(actionTimer);
   clearTimeout(idleTimer);
-  clearInterval(actionAnim);
+  stopBlink();
+  state = 'action';
 
   if (type === 'book') {
+    const frames = [IMGS.readBook1, IMGS.readBook2];
     let f = 0;
-    const fr = [IMGS.readBook1, IMGS.readBook2];
-    actionAnim = setInterval(() => { setImg(fr[f++ % 2]); }, 600);
+    setImg(frames[0]);
+    actionAnim = setInterval(() => { setImg(frames[f++ % 2]); }, 600);
     showBubble('セールのゲーム……たくさんあるねぇ……', 8000);
   } else if (type === 'game') {
+    const frames = [IMGS.gameplay1, IMGS.gameplay2];
     let f = 0;
-    const fr = [IMGS.gameplay1, IMGS.gameplay2];
-    actionAnim = setInterval(() => { setImg(fr[f++ % 2]); }, 500);
+    setImg(frames[0]);
+    actionAnim = setInterval(() => { setImg(frames[f++ % 2]); }, 500);
     showBubble('ゲームしてる……邪魔しないでよ……', 8000);
   }
 
+  // 10秒後に自動で徘徊に戻る
   actionTimer = setTimeout(() => {
     clearInterval(actionAnim);
+    actionAnim = null;
     returnToWalk();
   }, ACTION_RETURN_MS);
 }
 
 function returnToWalk() {
   clearInterval(actionAnim);
+  actionAnim = null;
   state = 'walk';
   stopBlink();
   setNewTarget();
@@ -392,52 +374,56 @@ function stopAll() {
   cancelAnimationFrame(animFrame); animFrame = null;
   clearTimeout(actionTimer); clearTimeout(blinkTimer);
   clearTimeout(bubbleTimer); clearTimeout(idleTimer);
-  clearInterval(actionAnim);
+  clearInterval(actionAnim); actionAnim = null;
 }
 
 // =====================================================
 // ドロップゾーン判定
-// （キャラクター中心がゾーン内にあるかどうか）
+// キャラクター中心とゾーンの矩形で重なりを判定
 // =====================================================
 function getOverlappingZone() {
+  // キャラクターの中心座標（viewport座標）
   const cx = posX + PET_SIZE / 2;
   const cy = posY + PET_SIZE / 2;
+
   for (const def of DROP_ZONE_DEFS) {
     const el = document.getElementById(def.id);
     if (!el) continue;
     const r = el.getBoundingClientRect();
-    // 判定範囲を広めに取る
-    if (cx >= r.left - 30 && cx <= r.right  + 30 &&
-        cy >= r.top  - 30 && cy <= r.bottom + 30) {
+    // マージンを加えて判定しやすくする
+    if (cx >= r.left   - DROP_HIT_MARGIN &&
+        cx <= r.right  + DROP_HIT_MARGIN &&
+        cy >= r.top    - DROP_HIT_MARGIN &&
+        cy <= r.bottom + DROP_HIT_MARGIN) {
       return def;
     }
   }
   return null;
 }
 
+// ドラッグ中の視覚更新（重なりチェック）
 function updateZoneVisuals() {
   const over = getOverlappingZone();
   DROP_ZONE_DEFS.forEach(def => {
-    const el  = document.getElementById(def.id);
-    const img = el ? el.querySelector('.dz-icon') : null;
-    if (!el) return;
+    const box = document.getElementById(def.id);
+    const img = box ? box.querySelector('.dz-icon') : null;
+    if (!box) return;
     const isOver = over && over.id === def.id;
-    el.style.borderColor = isOver ? 'rgba(129,140,248,0.95)' : 'rgba(129,140,248,0.35)';
-    el.style.background  = isOver ? 'rgba(129,140,248,0.2)'  : 'rgba(10,14,23,0.75)';
-    el.style.transform   = isOver ? 'scale(1.1)' : 'scale(1)';
-    // キャラクターが乗っている間はアイコンを非表示
-    if (img) img.style.opacity = isOver ? '0' : '1';
+    box.style.borderColor = isOver ? '#818cf8'             : 'rgba(129,140,248,0.4)';
+    box.style.background  = isOver ? 'rgba(129,140,248,0.2)' : 'rgba(10,14,23,0.8)';
+    box.style.transform   = isOver ? 'scale(1.12)'         : 'scale(1)';
+    if (img) img.style.opacity = isOver ? '0' : '1'; // 乗ってる間アイコン非表示
   });
 }
 
 function clearZoneVisuals() {
   DROP_ZONE_DEFS.forEach(def => {
-    const el  = document.getElementById(def.id);
-    const img = el ? el.querySelector('.dz-icon') : null;
-    if (el) {
-      el.style.borderColor = 'rgba(129,140,248,0.35)';
-      el.style.background  = 'rgba(10,14,23,0.75)';
-      el.style.transform   = 'scale(1)';
+    const box = document.getElementById(def.id);
+    const img = box ? box.querySelector('.dz-icon') : null;
+    if (box) {
+      box.style.borderColor = 'rgba(129,140,248,0.4)';
+      box.style.background  = 'rgba(10,14,23,0.8)';
+      box.style.transform   = 'scale(1)';
     }
     if (img) img.style.opacity = '1';
   });
@@ -447,21 +433,21 @@ function clearZoneVisuals() {
 // ドラッグ設定
 // =====================================================
 function setupDrag() {
-  let dragOffX = 0, dragOffY = 0;
-
-  function onDragStart(clientX, clientY) {
+  function onStart(clientX, clientY) {
     isDragging = true;
     dragOffX = clientX - posX;
     dragOffY = clientY - posY;
     petEl.style.cursor = 'grabbing';
-    state = 'action';
+    // stateをdragにしてループを維持しつつ歩きを止める
+    state = 'drag';
     stopBlink();
     clearTimeout(actionTimer);
     clearTimeout(idleTimer);
     clearInterval(actionAnim);
+    actionAnim = null;
   }
 
-  function onDragMove(clientX, clientY) {
+  function onMove(clientX, clientY) {
     if (!isDragging) return;
     posX = Math.max(0, Math.min(window.innerWidth  - PET_SIZE, clientX - dragOffX));
     posY = Math.max(0, Math.min(window.innerHeight - PET_SIZE, clientY - dragOffY));
@@ -469,10 +455,10 @@ function setupDrag() {
     petEl.style.left = posX + 'px';
     petEl.style.top  = posY + 'px';
     updateBubblePos();
-    updateZoneVisuals(); // ← ドラッグ中に常時判定
+    updateZoneVisuals();
   }
 
-  function onDragEnd() {
+  function onEnd() {
     if (!isDragging) return;
     isDragging = false;
     petEl.style.cursor = 'grab';
@@ -481,10 +467,12 @@ function setupDrag() {
     clearZoneVisuals();
 
     if (zone) {
+      // アクション発動
       doAction(zone.action);
     } else {
       setImg(IMGS.smile);
       showBubble('どこに連れてくの〜？', 3000);
+      state = 'action';
       actionTimer = setTimeout(() => returnToWalk(), 2000);
     }
   }
@@ -492,23 +480,23 @@ function setupDrag() {
   // マウス
   petEl.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
-    onDragStart(e.clientX, e.clientY);
+    onStart(e.clientX, e.clientY);
     e.preventDefault();
   });
-  document.addEventListener('mousemove', (e) => { onDragMove(e.clientX, e.clientY); });
-  document.addEventListener('mouseup',   () => { onDragEnd(); });
+  document.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+  document.addEventListener('mouseup',   () => onEnd());
 
   // タッチ
   petEl.addEventListener('touchstart', (e) => {
     const t = e.touches[0];
-    onDragStart(t.clientX, t.clientY);
+    onStart(t.clientX, t.clientY);
   }, { passive: true });
   document.addEventListener('touchmove', (e) => {
     if (!isDragging) return;
     const t = e.touches[0];
-    onDragMove(t.clientX, t.clientY);
+    onMove(t.clientX, t.clientY);
   }, { passive: true });
-  document.addEventListener('touchend', () => { onDragEnd(); });
+  document.addEventListener('touchend', () => onEnd());
 }
 
 // =====================================================
@@ -517,7 +505,7 @@ function setupDrag() {
 function setupClick() {
   petEl.addEventListener('click', (e) => {
     if (isDragging) return;
-    if (state === 'action') return;
+    if (state === 'action' || state === 'drag') return;
     e.stopPropagation();
     const happy = [IMGS.happy1, IMGS.happy2];
     let f = 0;
@@ -531,6 +519,12 @@ function setupClick() {
 }
 
 // =====================================================
+// ループ修正（dragステートに対応）
+// =====================================================
+// loop関数内でstate === 'drag'の時は位置更新のみ行う
+// （既にonMoveで更新しているので何もしない）
+
+// =====================================================
 // 初期化
 // =====================================================
 function initPet() {
@@ -541,7 +535,12 @@ function initPet() {
 
   buildPetDOM();
   buildToggleBtn();
-  buildDropZones();
+
+  // フィルターパネルが描画された後にドロップゾーンを配置
+  setTimeout(() => {
+    buildDropZones();
+  }, 300);
+
   setupDrag();
   setupClick();
 
@@ -549,6 +548,45 @@ function initPet() {
     showBubble('こんにちは！セール情報を一緒にチェックしよ！', 4000);
     setTimeout(() => startWalk(), 2000);
   }, 1000);
+}
+
+// =====================================================
+// ループ（drag対応版）
+// =====================================================
+function loop() {
+  animFrame = requestAnimationFrame(loop);
+
+  // drag中はonMoveで位置更新済みなので何もしない
+  if (state === 'drag') return;
+
+  if (state !== 'walk') {
+    petEl.style.left = posX + 'px';
+    petEl.style.top  = posY + 'px';
+    updateBubblePos();
+    return;
+  }
+
+  const dx = targetX - posX, dy = targetY - posY;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < PET_SPEED * 2) {
+    goIdle();
+  } else {
+    posX += (dx / dist) * PET_SPEED;
+    posY += (dy / dist) * PET_SPEED;
+    if (Math.abs(dx) > Math.abs(dy) * 0.5) {
+      direction = dx > 0 ? 'right' : 'left';
+      setImg(dx > 0 ? IMGS.walkRight : IMGS.walkLeft);
+    } else if (dy < -10) {
+      setImg(IMGS.walkBack);
+    } else {
+      setImg(direction === 'right' ? IMGS.walkRight : IMGS.walkLeft);
+    }
+  }
+
+  petEl.style.left = posX + 'px';
+  petEl.style.top  = posY + 'px';
+  updateBubblePos();
 }
 
 if (document.readyState === 'loading') {

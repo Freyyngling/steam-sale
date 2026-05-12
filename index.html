@@ -1281,39 +1281,42 @@ loadData();
   // =====================================================
   // バナー背景システム
   // =====================================================
-  (function() {
-    const wrap       = document.getElementById('banner-wrap');
-    const fileInput  = document.getElementById('banner-file-input');
-    const slider     = document.getElementById('banner-height-slider');
-    const valLabel   = document.getElementById('banner-height-val');
-    const removeBtn  = document.getElementById('banner-remove-btn');
+  document.addEventListener('DOMContentLoaded', function() {
+    const wrap      = document.getElementById('banner-wrap');
+    const fileInput = document.getElementById('banner-file-input');
+    const slider    = document.getElementById('banner-height-slider');
+    const valLabel  = document.getElementById('banner-height-val');
+    const removeBtn = document.getElementById('banner-remove-btn');
 
-    let mediaEl = null;
+    if (!wrap || !slider) return;
+
+    // banner-wrapのoverflowをvisibleに修正
+    wrap.style.overflow = 'hidden';
+
+    let mediaEl  = null;
     let savedUrl = null;
 
-    // ローカルストレージから高さを復元
+    // 高さ復元
     const savedH = localStorage.getItem('banner-height');
     if (savedH) {
-      wrap.style.height = savedH + 'px';
-      slider.value = savedH;
-      valLabel.textContent = savedH + 'px';
+      wrap.style.height     = savedH + 'px';
+      slider.value          = savedH;
+      valLabel.textContent  = savedH + 'px';
     }
 
     // 高さスライダー
-    slider.addEventListener('input', () => {
-      const h = slider.value;
-      wrap.style.height = h + 'px';
+    slider.addEventListener('input', function() {
+      const h = this.value;
+      wrap.style.height    = h + 'px';
       valLabel.textContent = h + 'px';
       localStorage.setItem('banner-height', h);
     });
 
     // ファイル選択
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
-
-      // 既存メディアを削除
-      if (mediaEl) { mediaEl.remove(); mediaEl = null; }
+      if (mediaEl)  { mediaEl.remove(); mediaEl = null; }
       if (savedUrl) { URL.revokeObjectURL(savedUrl); }
 
       savedUrl = URL.createObjectURL(file);
@@ -1321,28 +1324,26 @@ loadData();
 
       if (isVideo) {
         mediaEl = document.createElement('video');
-        mediaEl.autoplay = true;
-        mediaEl.loop = true;
-        mediaEl.muted = true;
+        mediaEl.autoplay  = true;
+        mediaEl.loop      = true;
+        mediaEl.muted     = true;
         mediaEl.playsInline = true;
-        mediaEl.src = savedUrl;
+        mediaEl.src       = savedUrl;
       } else {
         mediaEl = document.createElement('img');
         mediaEl.src = savedUrl;
       }
-
       mediaEl.className = 'banner-media';
-      // フェードレイヤーの前に挿入
       wrap.insertBefore(mediaEl, wrap.querySelector('.banner-fade'));
       fileInput.value = '';
     });
 
-    // 背景削除
-    removeBtn.addEventListener('click', () => {
-      if (mediaEl) { mediaEl.remove(); mediaEl = null; }
+    // 削除
+    removeBtn.addEventListener('click', function() {
+      if (mediaEl)  { mediaEl.remove(); mediaEl = null; }
       if (savedUrl) { URL.revokeObjectURL(savedUrl); savedUrl = null; }
     });
-  })();
+  });
   </script>
   <script src="pet.js"></script>
 </body>
