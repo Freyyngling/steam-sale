@@ -15,7 +15,7 @@ const MESSAGES = [
   "わたし、ずっとここでセール見てるよ……",
   "気になるゲームはさっさと買わないと後悔するからね！",
   "ねえねえ、そのゲームどうだった？",
-  "最近セール多くて財布が大変なことになっちゃうね……",
+  "最近セール多くて財布が大変なことになってる……",
   "割引率80%以上のゲームを狙えば間違いないよ！",
 ];
 
@@ -45,16 +45,10 @@ const IMGS = {
   gameplay2:   'gameplay2blink-half.png',
 };
 
-// =====================================================
-// キャラクター設定
-// =====================================================
-const PET_SIZE       = 200;
-const PET_SPEED      = 1.5;
+const PET_SIZE        = 150;
+const PET_SPEED       = 1.5;
 const ACTION_RETURN_MS = 10000;
 
-// =====================================================
-// 状態管理
-// =====================================================
 let petEl     = null;
 let bubbleEl  = null;
 let toggleBtn = null;
@@ -62,13 +56,14 @@ let visible   = true;
 
 let posX = 100, posY = 400;
 let targetX = 200, targetY = 400;
-let direction  = 'right';
-let state      = 'walk';
+let direction   = 'right';
+let state       = 'walk';
 let actionTimer = null;
 let blinkTimer  = null;
 let bubbleTimer = null;
 let animFrame   = null;
 let idleTimer   = null;
+let dragging    = false;  // グローバルで管理
 
 // =====================================================
 // DOM構築
@@ -77,8 +72,7 @@ function buildPetDOM() {
   const wrapper = document.createElement('div');
   wrapper.id = 'pet-wrapper';
   wrapper.style.cssText = `
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     pointer-events: none;
     z-index: 9000;
   `;
@@ -97,6 +91,8 @@ function buildPetDOM() {
     cursor: grab;
     pointer-events: auto;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+    user-select: none;
+    -webkit-user-drag: none;
   `;
 
   bubbleEl = document.createElement('div');
@@ -125,7 +121,7 @@ function buildPetDOM() {
   toggleBtn.textContent = '🌸 消す';
   toggleBtn.style.cssText = `
     position: fixed;
-    bottom: 96px;
+    bottom: 120px;
     right: 20px;
     background: rgba(15,18,35,0.9);
     border: 1px solid rgba(129,140,248,0.5);
@@ -154,10 +150,10 @@ function buildPetDOM() {
 // =====================================================
 function togglePet() {
   visible = !visible;
-  document.getElementById('pet-wrapper').style.display = visible ? '' : 'none';
-  // ドロップゾーンも連動
-  const dzContainer = document.getElementById('pet-dropzone-container');
-  if (dzContainer) dzContainer.style.display = visible ? '' : 'none';
+  const w  = document.getElementById('pet-wrapper');
+  const dz = document.getElementById('pet-dropzone-container');
+  if (w)  w.style.display  = visible ? '' : 'none';
+  if (dz) dz.style.display = visible ? '' : 'none';
   toggleBtn.textContent = visible ? '🌸 消す' : '🌸 出す';
   if (visible) startWalk();
   else stopAll();
@@ -178,9 +174,7 @@ function showBubble(text, durationMs) {
   bubbleEl.textContent = text;
   bubbleEl.style.display = 'block';
   updateBubblePos();
-  bubbleTimer = setTimeout(() => {
-    bubbleEl.style.display = 'none';
-  }, durationMs || 4000);
+  bubbleTimer = setTimeout(() => { bubbleEl.style.display = 'none'; }, durationMs || 4000);
 }
 
 function updateBubblePos() {
@@ -224,25 +218,17 @@ function startBlink() {
   }
   blinkTimer = setTimeout(doBlink, 2000 + Math.random() * 2000);
 }
-
-function stopBlink() {
-  clearTimeout(blinkTimer);
-}
+function stopBlink() { clearTimeout(blinkTimer); }
 
 // =====================================================
-// ターゲット設定
+// ターゲット・歩き
 // =====================================================
 function setNewTarget() {
   const margin = 60;
-  const maxX   = window.innerWidth  - PET_SIZE - margin;
-  const maxY   = window.innerHeight - PET_SIZE - margin;
-  targetX = margin + Math.random() * Math.max(0, maxX);
-  targetY = margin + Math.random() * Math.max(0, maxY);
+  targetX = margin + Math.random() * Math.max(0, window.innerWidth  - PET_SIZE - margin * 2);
+  targetY = margin + Math.random() * Math.max(0, window.innerHeight - PET_SIZE - margin * 2);
 }
 
-// =====================================================
-// 歩き開始
-// =====================================================
 function startWalk() {
   state = 'walk';
   stopBlink();
@@ -253,16 +239,12 @@ function startWalk() {
 
 function scheduleRandomTalk() {
   clearTimeout(idleTimer);
-  const delay = 8000 + Math.random() * 12000;
   idleTimer = setTimeout(() => {
     if (state === 'walk' || state === 'idle') showRandomMessage();
     scheduleRandomTalk();
-  }, delay);
+  }, 8000 + Math.random() * 12000);
 }
 
-// =====================================================
-// アイドル
-// =====================================================
 function goIdle() {
   state = 'idle';
   setImg(IMGS.neutral);
@@ -274,33 +256,36 @@ function goIdle() {
 // =====================================================
 // アクション
 // =====================================================
+let actionAnim = null;
+
 function doAction(type) {
   if (state === 'action') return;
   state = 'action';
   stopBlink();
   clearTimeout(actionTimer);
   clearTimeout(idleTimer);
+  clearInterval(actionAnim);
 
-  let anim;
   if (type === 'book') {
-    let frame = 0;
+    let f = 0;
     const frames = [IMGS.readBook1, IMGS.readBook2];
-    anim = setInterval(() => { setImg(frames[frame++ % 2]); }, 600);
+    actionAnim = setInterval(() => { setImg(frames[f++ % 2]); }, 600);
     showBubble('セールのゲーム……たくさんあるねぇ……', 8000);
   } else if (type === 'game') {
-    let frame = 0;
+    let f = 0;
     const frames = [IMGS.gameplay1, IMGS.gameplay2];
-    anim = setInterval(() => { setImg(frames[frame++ % 2]); }, 500);
+    actionAnim = setInterval(() => { setImg(frames[f++ % 2]); }, 500);
     showBubble('ゲームしてる……邪魔しないでよ……', 8000);
   }
 
   actionTimer = setTimeout(() => {
-    clearInterval(anim);
+    clearInterval(actionAnim);
     returnToWalk();
   }, ACTION_RETURN_MS);
 }
 
 function returnToWalk() {
+  clearInterval(actionAnim);
   state = 'walk';
   stopBlink();
   setNewTarget();
@@ -312,138 +297,51 @@ function returnToWalk() {
 // =====================================================
 function loop() {
   animFrame = requestAnimationFrame(loop);
-
   if (state !== 'walk') {
     petEl.style.left = posX + 'px';
     petEl.style.top  = posY + 'px';
     updateBubblePos();
     return;
   }
-
-  const dx   = targetX - posX;
-  const dy   = targetY - posY;
+  const dx = targetX - posX, dy = targetY - posY;
   const dist = Math.sqrt(dx * dx + dy * dy);
-
   if (dist < PET_SPEED * 2) {
     goIdle();
   } else {
     posX += (dx / dist) * PET_SPEED;
     posY += (dy / dist) * PET_SPEED;
-
     if (Math.abs(dx) > Math.abs(dy) * 0.5) {
-      if (dx > 0) { direction = 'right'; setImg(IMGS.walkRight); }
-      else        { direction = 'left';  setImg(IMGS.walkLeft);  }
+      direction = dx > 0 ? 'right' : 'left';
+      setImg(dx > 0 ? IMGS.walkRight : IMGS.walkLeft);
     } else if (dy < -10) {
       setImg(IMGS.walkBack);
     } else {
       setImg(direction === 'right' ? IMGS.walkRight : IMGS.walkLeft);
     }
   }
-
   petEl.style.left = posX + 'px';
   petEl.style.top  = posY + 'px';
   updateBubblePos();
 }
 
 function stopAll() {
-  cancelAnimationFrame(animFrame);
-  animFrame = null;
-  clearTimeout(actionTimer);
-  clearTimeout(blinkTimer);
-  clearTimeout(bubbleTimer);
-  clearTimeout(idleTimer);
+  cancelAnimationFrame(animFrame); animFrame = null;
+  clearTimeout(actionTimer); clearTimeout(blinkTimer);
+  clearTimeout(bubbleTimer); clearTimeout(idleTimer);
+  clearInterval(actionAnim);
 }
 
 // =====================================================
-// ドラッグ
-// =====================================================
-function setupDrag() {
-  let dragging = false;
-  let dragOffX = 0, dragOffY = 0;
-
-  petEl.addEventListener('mousedown', (e) => {
-    dragging = true;
-    dragOffX = e.clientX - posX;
-    dragOffY = e.clientY - posY;
-    petEl.style.cursor = 'grabbing';
-    state = 'action';
-    stopBlink();
-    clearTimeout(actionTimer);
-    clearTimeout(idleTimer);
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!dragging) return;
-    posX = e.clientX - dragOffX;
-    posY = e.clientY - dragOffY;
-    setImg(IMGS.surprised);
-    petEl.style.left = posX + 'px';
-    petEl.style.top  = posY + 'px';
-    updateBubblePos();
-    // ドロップゾーンをホバー時にハイライト
-    highlightDropZone(e.clientX, e.clientY);
-  });
-
-  document.addEventListener('mouseup', (e) => {
-    if (!dragging) return;
-    dragging = false;
-    petEl.style.cursor = 'grab';
-    clearAllHighlights();
-    const dropped = checkDropZone(e.clientX, e.clientY);
-    if (!dropped) {
-      setImg(IMGS.smile);
-      showBubble('どこに連れてくの〜？', 3000);
-      actionTimer = setTimeout(() => returnToWalk(), 2000);
-    }
-  });
-
-  // タッチ対応
-  petEl.addEventListener('touchstart', (e) => {
-    const t = e.touches[0];
-    dragging = true;
-    dragOffX = t.clientX - posX;
-    dragOffY = t.clientY - posY;
-    state = 'action';
-    stopBlink();
-    clearTimeout(actionTimer);
-    clearTimeout(idleTimer);
-  }, { passive: true });
-
-  document.addEventListener('touchmove', (e) => {
-    if (!dragging) return;
-    const t = e.touches[0];
-    posX = t.clientX - dragOffX;
-    posY = t.clientY - dragOffY;
-    setImg(IMGS.surprised);
-    petEl.style.left = posX + 'px';
-    petEl.style.top  = posY + 'px';
-    updateBubblePos();
-    highlightDropZone(t.clientX, t.clientY);
-  }, { passive: true });
-
-  document.addEventListener('touchend', (e) => {
-    if (!dragging) return;
-    dragging = false;
-    clearAllHighlights();
-    const t = e.changedTouches[0];
-    const dropped = checkDropZone(t.clientX, t.clientY);
-    if (!dropped) {
-      setImg(IMGS.smile);
-      showBubble('どこに連れてくの〜？', 3000);
-      actionTimer = setTimeout(() => returnToWalk(), 2000);
-    }
-  });
-}
-
-// =====================================================
-// ドロップゾーン
+// ドロップゾーン定義
 // =====================================================
 const DROP_ZONE_DEFS = [
   { id: 'dz-book', action: 'book', img: 'desk_aicon.png', label: '調べる' },
   { id: 'dz-game', action: 'game', img: 'TV_aicon.png',   label: 'ゲーム' },
 ];
 
+// =====================================================
+// ドロップゾーン構築
+// =====================================================
 function buildDropZones() {
   const container = document.createElement('div');
   container.id = 'pet-dropzone-container';
@@ -453,7 +351,7 @@ function buildDropZones() {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 20px;
+    gap: 24px;
     z-index: 9001;
     pointer-events: none;
     align-items: flex-end;
@@ -462,41 +360,38 @@ function buildDropZones() {
   DROP_ZONE_DEFS.forEach(def => {
     const wrap = document.createElement('div');
     wrap.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
     `;
 
     const el = document.createElement('div');
     el.id = def.id;
+    el.dataset.action = def.action;
     el.style.cssText = `
-      width: 80px;
-      height: 80px;
+      width: 80px; height: 80px;
       border: 2px dashed rgba(129,140,248,0.35);
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.2s, background 0.2s, transform 0.15s;
-      background: rgba(10,14,23,0.6);
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(10,14,23,0.7);
       overflow: hidden;
+      transition: border-color 0.15s, background 0.15s, transform 0.15s;
+      position: relative;
     `;
 
     const img = document.createElement('img');
     img.src = def.img;
+    img.className = 'dz-icon';
     img.style.cssText = `
-      width: 68px;
-      height: 68px;
+      width: 68px; height: 68px;
       object-fit: contain;
       image-rendering: pixelated;
+      transition: opacity 0.2s;
     `;
 
     const label = document.createElement('span');
     label.textContent = def.label;
     label.style.cssText = `
-      font-size: 10px;
-      color: #64748b;
+      font-size: 10px; color: #64748b;
       font-family: 'Noto Sans JP', sans-serif;
     `;
 
@@ -509,39 +404,151 @@ function buildDropZones() {
   document.body.appendChild(container);
 }
 
-function highlightDropZone(cx, cy) {
-  DROP_ZONE_DEFS.forEach(def => {
+// =====================================================
+// ドラッグ中のゾーン判定ヘルパー
+// =====================================================
+function getHoveredZone(cx, cy) {
+  for (const def of DROP_ZONE_DEFS) {
     const el = document.getElementById(def.id);
-    if (!el) return;
+    if (!el) continue;
     const r = el.getBoundingClientRect();
-    const over = cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
-    el.style.borderColor  = over ? 'rgba(129,140,248,0.9)' : 'rgba(129,140,248,0.35)';
-    el.style.background   = over ? 'rgba(129,140,248,0.2)' : 'rgba(10,14,23,0.6)';
-    el.style.transform    = over ? 'scale(1.1)' : 'scale(1)';
+    // ヒット判定を少し広げる（キャラ中心で判定）
+    const px = posX + PET_SIZE / 2;
+    const py = posY + PET_SIZE / 2;
+    if (px >= r.left - 20 && px <= r.right + 20 &&
+        py >= r.top  - 20 && py <= r.bottom + 20) {
+      return def;
+    }
+  }
+  return null;
+}
+
+function updateZoneHighlight(cx, cy) {
+  DROP_ZONE_DEFS.forEach(def => {
+    const el  = document.getElementById(def.id);
+    const img = el ? el.querySelector('.dz-icon') : null;
+    if (!el) return;
+
+    const r   = el.getBoundingClientRect();
+    const px  = posX + PET_SIZE / 2;
+    const py  = posY + PET_SIZE / 2;
+    const over = px >= r.left - 20 && px <= r.right + 20 &&
+                 py >= r.top  - 20 && py <= r.bottom + 20;
+
+    el.style.borderColor = over ? 'rgba(129,140,248,0.95)' : 'rgba(129,140,248,0.35)';
+    el.style.background  = over ? 'rgba(129,140,248,0.18)' : 'rgba(10,14,23,0.7)';
+    el.style.transform   = over ? 'scale(1.12)' : 'scale(1)';
+    // アイコンをキャラが乗っている間は非表示
+    if (img) img.style.opacity = over ? '0' : '1';
   });
 }
 
 function clearAllHighlights() {
   DROP_ZONE_DEFS.forEach(def => {
-    const el = document.getElementById(def.id);
-    if (!el) return;
-    el.style.borderColor = 'rgba(129,140,248,0.35)';
-    el.style.background  = 'rgba(10,14,23,0.6)';
-    el.style.transform   = 'scale(1)';
+    const el  = document.getElementById(def.id);
+    const img = el ? el.querySelector('.dz-icon') : null;
+    if (el) {
+      el.style.borderColor = 'rgba(129,140,248,0.35)';
+      el.style.background  = 'rgba(10,14,23,0.7)';
+      el.style.transform   = 'scale(1)';
+    }
+    if (img) img.style.opacity = '1';
   });
 }
 
-function checkDropZone(cx, cy) {
-  for (const def of DROP_ZONE_DEFS) {
-    const el = document.getElementById(def.id);
-    if (!el) continue;
-    const r = el.getBoundingClientRect();
-    if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
-      doAction(def.action);
-      return true;
+// =====================================================
+// ドラッグ設定
+// =====================================================
+function setupDrag() {
+  let dragOffX = 0, dragOffY = 0;
+
+  // ----- マウス -----
+  petEl.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    dragging = true;
+    dragOffX = e.clientX - posX;
+    dragOffY = e.clientY - posY;
+    petEl.style.cursor = 'grabbing';
+    state = 'action';
+    stopBlink();
+    clearTimeout(actionTimer);
+    clearTimeout(idleTimer);
+    clearInterval(actionAnim);
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    posX = e.clientX - dragOffX;
+    posY = e.clientY - dragOffY;
+    // 画面外に出ないようにクランプ
+    posX = Math.max(0, Math.min(window.innerWidth  - PET_SIZE, posX));
+    posY = Math.max(0, Math.min(window.innerHeight - PET_SIZE, posY));
+    setImg(IMGS.surprised);
+    petEl.style.left = posX + 'px';
+    petEl.style.top  = posY + 'px';
+    updateBubblePos();
+    updateZoneHighlight(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('mouseup', (e) => {
+    if (!dragging) return;
+    dragging = false;
+    petEl.style.cursor = 'grab';
+
+    const zone = getHoveredZone(e.clientX, e.clientY);
+    clearAllHighlights();
+
+    if (zone) {
+      doAction(zone.action);
+    } else {
+      setImg(IMGS.smile);
+      showBubble('どこに連れてくの〜？', 3000);
+      actionTimer = setTimeout(() => returnToWalk(), 2000);
     }
-  }
-  return false;
+  });
+
+  // ----- タッチ -----
+  petEl.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    dragging = true;
+    dragOffX = t.clientX - posX;
+    dragOffY = t.clientY - posY;
+    state = 'action';
+    stopBlink();
+    clearTimeout(actionTimer);
+    clearTimeout(idleTimer);
+    clearInterval(actionAnim);
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    const t = e.touches[0];
+    posX = t.clientX - dragOffX;
+    posY = t.clientY - dragOffY;
+    posX = Math.max(0, Math.min(window.innerWidth  - PET_SIZE, posX));
+    posY = Math.max(0, Math.min(window.innerHeight - PET_SIZE, posY));
+    setImg(IMGS.surprised);
+    petEl.style.left = posX + 'px';
+    petEl.style.top  = posY + 'px';
+    updateBubblePos();
+    updateZoneHighlight(t.clientX, t.clientY);
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!dragging) return;
+    dragging = false;
+    const t = e.changedTouches[0];
+    const zone = getHoveredZone(t.clientX, t.clientY);
+    clearAllHighlights();
+    if (zone) {
+      doAction(zone.action);
+    } else {
+      setImg(IMGS.smile);
+      showBubble('どこに連れてくの〜？', 3000);
+      actionTimer = setTimeout(() => returnToWalk(), 2000);
+    }
+  });
 }
 
 // =====================================================
@@ -549,6 +556,7 @@ function checkDropZone(cx, cy) {
 // =====================================================
 function setupClick() {
   petEl.addEventListener('click', (e) => {
+    if (dragging) return;
     if (state === 'action') return;
     e.stopPropagation();
     const happy = [IMGS.happy1, IMGS.happy2];
@@ -567,7 +575,7 @@ function setupClick() {
 // =====================================================
 function initPet() {
   posX    = window.innerWidth  / 2 - PET_SIZE / 2;
-  posY    = window.innerHeight - PET_SIZE - 120;
+  posY    = window.innerHeight - PET_SIZE - 140;
   targetX = posX;
   targetY = posY;
 

@@ -734,6 +734,23 @@
 
 <div id="status-bar"></div>
 
+<!-- バナー背景 -->
+<div class="banner-wrap" id="banner-wrap">
+  <!-- ここにimg or videoが動的に挿入される -->
+  <div class="banner-fade"></div>
+  <div class="banner-settings">
+    <label class="banner-upload-btn" for="banner-file-input">
+      🖼 背景を設定
+    </label>
+    <input type="file" id="banner-file-input" accept="image/*,video/*" style="display:none;">
+    <span class="banner-height-label">📐 バナー高さ</span>
+    <input type="range" class="banner-height-slider" id="banner-height-slider"
+      min="80" max="380" value="200">
+    <span class="banner-height-val" id="banner-height-val">200px</span>
+    <button class="banner-remove-btn" id="banner-remove-btn" title="背景を削除">✕</button>
+  </div>
+</div>
+
 <div class="sort-bar">
   <span class="bar-label">並び替え</span>
   <select class="sort-select active" id="sort-discount" onchange="onSelectSort('discount', this)">
@@ -1251,6 +1268,73 @@ async function loadData() {
 
 loadData();
 </script>
+  <script>
+  // =====================================================
+  // バナー背景システム
+  // =====================================================
+  (function() {
+    const wrap       = document.getElementById('banner-wrap');
+    const fileInput  = document.getElementById('banner-file-input');
+    const slider     = document.getElementById('banner-height-slider');
+    const valLabel   = document.getElementById('banner-height-val');
+    const removeBtn  = document.getElementById('banner-remove-btn');
+
+    let mediaEl = null;
+    let savedUrl = null;
+
+    // ローカルストレージから高さを復元
+    const savedH = localStorage.getItem('banner-height');
+    if (savedH) {
+      wrap.style.height = savedH + 'px';
+      slider.value = savedH;
+      valLabel.textContent = savedH + 'px';
+    }
+
+    // 高さスライダー
+    slider.addEventListener('input', () => {
+      const h = slider.value;
+      wrap.style.height = h + 'px';
+      valLabel.textContent = h + 'px';
+      localStorage.setItem('banner-height', h);
+    });
+
+    // ファイル選択
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // 既存メディアを削除
+      if (mediaEl) { mediaEl.remove(); mediaEl = null; }
+      if (savedUrl) { URL.revokeObjectURL(savedUrl); }
+
+      savedUrl = URL.createObjectURL(file);
+      const isVideo = file.type.startsWith('video/');
+
+      if (isVideo) {
+        mediaEl = document.createElement('video');
+        mediaEl.autoplay = true;
+        mediaEl.loop = true;
+        mediaEl.muted = true;
+        mediaEl.playsInline = true;
+        mediaEl.src = savedUrl;
+      } else {
+        mediaEl = document.createElement('img');
+        mediaEl.src = savedUrl;
+      }
+
+      mediaEl.className = 'banner-media';
+      // フェードレイヤーの前に挿入
+      wrap.insertBefore(mediaEl, wrap.querySelector('.banner-fade'));
+      fileInput.value = '';
+    });
+
+    // 背景削除
+    removeBtn.addEventListener('click', () => {
+      if (mediaEl) { mediaEl.remove(); mediaEl = null; }
+      if (savedUrl) { URL.revokeObjectURL(savedUrl); savedUrl = null; }
+    });
+  })();
+  </script>
   <script src="pet.js"></script>
 </body>
 </html>
