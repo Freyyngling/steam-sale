@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow, noarchive">
 <title>Steam セール — 割引率順</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
@@ -423,6 +422,8 @@
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    z-index: 1;
   }
 
   .band-header {
@@ -433,6 +434,8 @@
     cursor: pointer;
     user-select: none;
     transition: filter 0.15s;
+    position: relative;
+    z-index: 2;
   }
   .band-header:hover { filter: brightness(1.15); }
 
@@ -465,6 +468,8 @@
     gap: 16px;
     padding: 12px 12px 16px 12px;
     background: rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 1;
   }
   .band-grid.hidden { display: none; }
 
@@ -711,11 +716,11 @@
       <div class="news-content" id="news-content">
         <!-- ここにお知らせを追加してください。同じ内容を2回書くとループがつながります -->
         <span class="news-item">⚠️ データ取得日時と実際の表示時間には差がある場合があります。購入前に必ず Steam ストアで価格をご確認ください。</span>
-        <span class="news-item">📌 次回の更新日予定は未定です。6月25日からサマーセールっぽそうなのでその時には多分、更新します。忘れてたらごめんなさいm(_ _;)m</span>
+        <span class="news-item">📌 セール情報を最新にするには fetch.bat を実行後「表示を更新」を押してください。</span>
         <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
         <!-- ループ用（同じ内容をもう一度） -->
         <span class="news-item">⚠️ データ取得日時と実際の表示時間には差がある場合があります。購入前に必ず Steam ストアで価格をご確認ください。</span>
-        <span class="news-item">📌 次回の更新日予定は未定です。6月25日からサマーセールっぽそうなのでその時には多分、更新します。忘れてたらごめんなさいm(_ _;)m</span>
+        <span class="news-item">📌 セール情報を最新にするには fetch.bat を実行後「表示を更新」を押してください。</span>
         <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
       </div>
     </div>
@@ -739,17 +744,6 @@
 <div class="banner-wrap" id="banner-wrap">
   <!-- ここにimg or videoが動的に挿入される -->
   <div class="banner-fade"></div>
-  <div class="banner-settings">
-    <label class="banner-upload-btn" for="banner-file-input">
-      🖼 背景を設定
-    </label>
-    <input type="file" id="banner-file-input" accept="image/*,video/*" style="display:none;">
-    <span class="banner-height-label">📐 バナー高さ</span>
-    <input type="range" class="banner-height-slider" id="banner-height-slider"
-      min="80" max="380" value="200">
-    <span class="banner-height-val" id="banner-height-val">200px</span>
-    <button class="banner-remove-btn" id="banner-remove-btn" title="背景を削除">✕</button>
-  </div>
 </div>
 
 <div class="sort-bar">
@@ -771,6 +765,20 @@
   </select>
   <button class="sort-btn" data-sort="name">名前順</button>
   <button class="sort-btn" data-sort="relevance">適合性</button>
+
+  <!-- バナー設定（右側） -->
+  <div id="banner-controls" style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <label class="banner-upload-btn" for="banner-file-input" style="white-space:nowrap;font-size:11px;padding:5px 10px;background:rgba(129,140,248,0.12);border:1px solid rgba(129,140,248,0.4);color:#94a3b8;border-radius:6px;cursor:pointer;">
+      🖼 背景
+    </label>
+    <input type="file" id="banner-file-input" accept="image/*,video/*" style="display:none;">
+    <span style="font-size:10px;color:#64748b;white-space:nowrap;">📐</span>
+    <input type="range" id="banner-height-slider" min="80" max="380" value="200"
+      style="-webkit-appearance:none;width:80px;height:4px;background:rgba(129,140,248,0.25);border-radius:2px;outline:none;cursor:pointer;">
+    <span id="banner-height-val" style="font-family:'Rajdhani',sans-serif;font-size:12px;color:#818cf8;min-width:36px;">200px</span>
+    <button id="banner-remove-btn" title="背景を削除"
+      style="background:transparent;border:none;color:#64748b;font-size:13px;cursor:pointer;padding:0;line-height:1;">✕</button>
+  </div>
 </div>
 
 <div class="filter-panel">
