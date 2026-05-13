@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow, noarchive">
 <title>Steam セール — 割引率順</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
@@ -272,12 +271,53 @@
   }
 
   .filter-panel {
-    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    background: transparent;
     border-bottom: 1px solid var(--border);
     padding: 16px 32px;
     display: flex;
     flex-direction: column;
     gap: 14px;
+  }
+
+  /* フィルターパネル内バナー */
+  .filter-panel-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .filter-panel-bg-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .filter-panel-bg-fade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(10,14,23,0.55) 0%,
+      rgba(10,14,23,0.75) 100%
+    );
+    z-index: 1;
+  }
+
+  .filter-panel {
+    position: relative;
+  }
+
+  .filter-row {
+    position: relative;
+    z-index: 2;
   }
 
   .filter-row {
@@ -717,11 +757,11 @@
       <div class="news-content" id="news-content">
         <!-- ここにお知らせを追加してください。同じ内容を2回書くとループがつながります -->
         <span class="news-item">⚠️ データ取得日時と実際の表示時間には差がある場合があります。購入前に必ず Steam ストアで価格をご確認ください。</span>
-        <span class="news-item">📌 6月25日くらいから来るサマーセールまでの間に、どこかで1回更新しようと思ってます。</span>
+        <span class="news-item">📌 セール情報を最新にするには fetch.bat を実行後「表示を更新」を押してください。</span>
         <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
         <!-- ループ用（同じ内容をもう一度） -->
         <span class="news-item">⚠️ データ取得日時と実際の表示時間には差がある場合があります。購入前に必ず Steam ストアで価格をご確認ください。</span>
-        <span class="news-item">📌 6月25日くらいから来るサマーセールまでの間に、どこかで1回更新しようと思ってます。</span>
+        <span class="news-item">📌 セール情報を最新にするには fetch.bat を実行後「表示を更新」を押してください。</span>
         <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
       </div>
     </div>
@@ -782,7 +822,11 @@
   </div>
 </div>
 
-<div class="filter-panel">
+<div class="filter-panel" id="filter-panel">
+  <!-- フィルターパネル内バナー背景 -->
+  <div class="filter-panel-bg" id="filter-panel-bg">
+    <div class="filter-panel-bg-fade"></div>
+  </div>
   <div class="filter-row">
     <span class="filter-section-label">価格上限</span>
     <div class="slider-group">
@@ -1284,65 +1328,92 @@ loadData();
   // =====================================================
   document.addEventListener('DOMContentLoaded', function() {
     const wrap      = document.getElementById('banner-wrap');
+    const fpBg      = document.getElementById('filter-panel-bg');
     const fileInput = document.getElementById('banner-file-input');
     const slider    = document.getElementById('banner-height-slider');
     const valLabel  = document.getElementById('banner-height-val');
     const removeBtn = document.getElementById('banner-remove-btn');
 
-    if (!wrap || !slider) return;
+    if (!slider) return;
 
-    // banner-wrapのoverflowをvisibleに修正
-    wrap.style.overflow = 'hidden';
+    let mediaEl    = null;
+    let fpMediaEl  = null;
+    let savedUrl   = null;
 
-    let mediaEl  = null;
-    let savedUrl = null;
-
-    // 高さ復元
+    // 高さ復元（banner-wrapは使わない、filter-panelの高さはcontent依存なのでsliderは表示調整用）
     const savedH = localStorage.getItem('banner-height');
-    if (savedH) {
-      wrap.style.height     = savedH + 'px';
-      slider.value          = savedH;
-      valLabel.textContent  = savedH + 'px';
+    if (savedH && wrap) {
+      wrap.style.height    = savedH + 'px';
+      slider.value         = savedH;
+      valLabel.textContent = savedH + 'px';
     }
 
-    // 高さスライダー
+    // 高さスライダー → banner-wrapとfilter-panelの不透明度で調整
     slider.addEventListener('input', function() {
-      const h = this.value;
-      wrap.style.height    = h + 'px';
+      const h = parseInt(this.value);
       valLabel.textContent = h + 'px';
       localStorage.setItem('banner-height', h);
+      if (wrap) wrap.style.height = h + 'px';
+      // フィルターパネル背景のオーバーレイ濃度を調整（高さ最大で薄く、最小で濃く）
+      const opacity = 0.4 + (h - 80) / (380 - 80) * 0.4; // 0.4〜0.8
+      updateFpOverlay(1 - opacity);
     });
+
+    function updateFpOverlay(alpha) {
+      const fade = fpBg ? fpBg.querySelector('.filter-panel-bg-fade') : null;
+      if (fade) {
+        fade.style.background = `linear-gradient(to bottom, rgba(10,14,23,${alpha}) 0%, rgba(10,14,23,${Math.min(1, alpha + 0.2)}) 100%)`;
+      }
+    }
+
+    function createMedia(url, isVideo) {
+      let el;
+      if (isVideo) {
+        el = document.createElement('video');
+        el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true;
+        el.src = url;
+      } else {
+        el = document.createElement('img');
+        el.src = url;
+      }
+      return el;
+    }
 
     // ファイル選択
     fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
-      if (mediaEl)  { mediaEl.remove(); mediaEl = null; }
-      if (savedUrl) { URL.revokeObjectURL(savedUrl); }
+
+      // 既存削除
+      if (mediaEl)   { mediaEl.remove();   mediaEl   = null; }
+      if (fpMediaEl) { fpMediaEl.remove(); fpMediaEl = null; }
+      if (savedUrl)  { URL.revokeObjectURL(savedUrl); }
 
       savedUrl = URL.createObjectURL(file);
       const isVideo = file.type.startsWith('video/');
 
-      if (isVideo) {
-        mediaEl = document.createElement('video');
-        mediaEl.autoplay  = true;
-        mediaEl.loop      = true;
-        mediaEl.muted     = true;
-        mediaEl.playsInline = true;
-        mediaEl.src       = savedUrl;
-      } else {
-        mediaEl = document.createElement('img');
-        mediaEl.src = savedUrl;
+      // banner-wrap用
+      if (wrap) {
+        mediaEl = createMedia(savedUrl, isVideo);
+        mediaEl.className = 'banner-media';
+        wrap.insertBefore(mediaEl, wrap.querySelector('.banner-fade'));
       }
-      mediaEl.className = 'banner-media';
-      wrap.insertBefore(mediaEl, wrap.querySelector('.banner-fade'));
+
+      // filter-panel背景用
+      if (fpBg) {
+        fpMediaEl = createMedia(savedUrl, isVideo);
+        fpMediaEl.className = 'filter-panel-bg-media';
+        fpBg.insertBefore(fpMediaEl, fpBg.querySelector('.filter-panel-bg-fade'));
+      }
+
       fileInput.value = '';
     });
 
     // 削除
     removeBtn.addEventListener('click', function() {
-      if (mediaEl)  { mediaEl.remove(); mediaEl = null; }
-      if (savedUrl) { URL.revokeObjectURL(savedUrl); savedUrl = null; }
+      if (mediaEl)   { mediaEl.remove();   mediaEl   = null; }
+      if (fpMediaEl) { fpMediaEl.remove(); fpMediaEl = null; }
+      if (savedUrl)  { URL.revokeObjectURL(savedUrl); savedUrl = null; }
     });
   });
   </script>

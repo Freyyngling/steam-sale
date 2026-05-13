@@ -1,20 +1,48 @@
 // =====================================================
-// Steam セール観測所 - キャラクターシステム v4
+// Steam セール観測所 - キャラクターシステム v5
 // =====================================================
 
-// ★ 吹き出しコメントはここを編集 ★
+// ★ 吹き出しコメント設定 ★
+// 文字列 → 1回で表示
+// 配列   → 順番に分けて表示（1つの会話として）
 const MESSAGES = [
   "このセール、見逃したら絶対後悔するよ！",
   "割引率90%以上のゲームがあるよ！急いで！",
   "日本語対応フィルターで絞り込めるの知ってた？",
-  "セール終了前に価格確認してね！",
+  [
+    "セール終了前に価格確認してね！",
+    "Steamのページで実際の価格を確かめてから買うのが安心だよ。",
+    "わたしのデータは取得した時点のものだから……ちょっと古いかも。",
+  ],
   "今日のおすすめは割引率の高い順で上位のやつだよ！",
-  "わたし、ずっとここでセール見てるよ……",
+  [
+    "わたし、ずっとここでセール見てるよ……",
+    "それって少し寂しいような、でも楽しいような。",
+    "一緒にいてくれてありがとう。",
+  ],
   "気になるゲームはさっさと買わないと後悔するからね！",
-  "ねえねえ、そのゲームどうだった？",
+  [
+    "ねえねえ、そのゲームどうだった？",
+    "おもしろかった？それともまだ積んでる……？",
+    "わたしは積みゲーのことは言えないけどね。",
+  ],
   "最近セール多くて財布が大変なことになってる……",
   "割引率80%以上のゲームを狙えば間違いないよ！",
 ];
+
+// ★ アクション時のコメント ★
+const ACTION_COMMENTS = {
+  book: [
+    "セールのゲーム……たくさんあるねぇ……",
+    "これも面白そう。あ、こっちも。全部買えないよ……",
+    "割引率と評価を見比べて……うーん、迷う。",
+  ],
+  game: [
+    "ゲームしてる……邪魔しないでよ……",
+    "今いいところなんだから！あとちょっとだから！",
+    "セールで買ったゲームは積まないって決めたのに……",
+  ],
+};
 
 const IMGS = {
   walkRight:   'Right.png',
@@ -41,8 +69,9 @@ const IMGS = {
 
 const PET_SIZE         = 150;
 const PET_SPEED        = 1.5;
-const ACTION_RETURN_MS = 10000;
-const DROP_HIT_MARGIN  = 40; // 判定の余裕（px）
+const ACTION_RETURN_MS = 12000;
+const DROP_HIT_MARGIN  = 40;
+const MSG_INTERVAL_MS  = 4000; // 複数行コメントの間隔
 
 const DROP_ZONE_DEFS = [
   { id: 'dz-book', action: 'book', img: 'desk_aicon.png', label: '調べる' },
@@ -65,9 +94,10 @@ let idleTimer   = null;
 let actionAnim  = null;
 let isDragging  = false;
 let dragOffX = 0, dragOffY = 0;
+let msgSeqTimer = null; // 複数行コメントのタイマー
 
 // =====================================================
-// キャラクターDOM
+// DOM構築
 // =====================================================
 function buildPetDOM() {
   const wrapper = document.createElement('div');
@@ -96,7 +126,7 @@ function buildPetDOM() {
     border:1px solid rgba(129,140,248,0.7);
     border-radius:12px;padding:8px 12px;
     font-size:12px;font-family:'Noto Sans JP',sans-serif;
-    color:#e2e8f0;max-width:200px;line-height:1.6;
+    color:#e2e8f0;max-width:220px;line-height:1.6;
     pointer-events:none;display:none;
     box-shadow:0 4px 16px rgba(0,0,0,0.5);
     word-break:break-all;z-index:9002;
@@ -126,15 +156,14 @@ function buildToggleBtn() {
 }
 
 // =====================================================
-// ドロップゾーン：価格上限バーの右に配置
+// ドロップゾーン：価格上限スライダーの真横に配置
 // =====================================================
 function buildDropZones() {
   DROP_ZONE_DEFS.forEach((def, idx) => {
     const wrap = document.createElement('div');
     wrap.className = 'dz-wrap';
     wrap.style.cssText = `
-      position:fixed;
-      z-index:200;
+      position:fixed;z-index:300;
       display:flex;flex-direction:column;
       align-items:center;gap:3px;
       pointer-events:none;
@@ -143,11 +172,11 @@ function buildDropZones() {
     const box = document.createElement('div');
     box.id = def.id;
     box.style.cssText = `
-      width:60px;height:60px;
-      border:2px dashed rgba(129,140,248,0.4);
+      width:56px;height:56px;
+      border:2px dashed rgba(129,140,248,0.45);
       border-radius:10px;
       display:flex;align-items:center;justify-content:center;
-      background:rgba(10,14,23,0.8);
+      background:rgba(10,14,23,0.82);
       overflow:hidden;
       transition:border-color 0.15s,background 0.15s,transform 0.15s;
     `;
@@ -156,10 +185,9 @@ function buildDropZones() {
     img.src = def.img;
     img.className = 'dz-icon';
     img.style.cssText = `
-      width:52px;height:52px;
+      width:48px;height:48px;
       object-fit:contain;image-rendering:pixelated;
-      transition:opacity 0.15s;
-      pointer-events:none;
+      transition:opacity 0.15s;pointer-events:none;
     `;
 
     const label = document.createElement('span');
@@ -171,26 +199,26 @@ function buildDropZones() {
     wrap.appendChild(label);
     document.body.appendChild(wrap);
 
-    // 価格上限バーの右側に配置する
+    // 価格上限スライダーの右横に配置
     function positionZone() {
-      // 価格上限のfilter-rowを探す
-      const filterRows = document.querySelectorAll('.filter-row');
-      let priceRow = null;
-      filterRows.forEach(row => {
-        if (row.textContent.includes('価格上限')) priceRow = row;
-      });
+      const priceSlider = document.getElementById('price-slider');
+      const priceDisplay = document.getElementById('price-display');
+      if (!priceSlider) return;
 
-      if (!priceRow) return;
-      const r = priceRow.getBoundingClientRect();
-      // 右から idx番目に並べる（2つなので右端から60px間隔）
-      const rightPos = 32 + idx * 76;
-      wrap.style.top   = (r.top + (r.height - 60) / 2) + 'px';
-      wrap.style.right = rightPos + 'px';
+      const sr = priceSlider.getBoundingClientRect();
+      const dr = priceDisplay ? priceDisplay.getBoundingClientRect() : sr;
+
+      // display要素の右端から少し離して配置
+      const baseRight = window.innerWidth - Math.max(sr.right, dr.right) - 12;
+      // 2つ並べる（idx=0が右端、idx=1がその左）
+      const offset = baseRight + idx * 68;
+
+      wrap.style.top   = (sr.top + (sr.height - 56) / 2 - 4) + 'px';
+      wrap.style.right = offset + 'px';
     }
 
     positionZone();
     window.addEventListener('resize', positionZone);
-    // スクロール時に再計算（filter-panelはスクロールで動かない固定ではないので）
     window.addEventListener('scroll', positionZone, { passive: true });
   });
 }
@@ -211,12 +239,15 @@ function togglePet() {
 }
 
 // =====================================================
-// 画像・吹き出し
+// 画像切り替え
 // =====================================================
 function setImg(src) {
   if (petEl && !petEl.src.endsWith(src)) petEl.src = src;
 }
 
+// =====================================================
+// 吹き出し（単一・複数行両対応）
+// =====================================================
 function showBubble(text, ms) {
   clearTimeout(bubbleTimer);
   bubbleEl.textContent = text;
@@ -225,8 +256,13 @@ function showBubble(text, ms) {
   bubbleTimer = setTimeout(() => { bubbleEl.style.display = 'none'; }, ms || 4000);
 }
 
+function hideBubble() {
+  clearTimeout(bubbleTimer);
+  bubbleEl.style.display = 'none';
+}
+
 function updateBubblePos() {
-  const bw = 200;
+  const bw = 220;
   let bx = posX + PET_SIZE / 2 - bw / 2;
   let by = posY - 90;
   bx = Math.max(10, Math.min(window.innerWidth - bw - 10, bx));
@@ -236,8 +272,34 @@ function updateBubblePos() {
   bubbleEl.style.width = bw + 'px';
 }
 
-function showRandomMessage() {
-  showBubble(MESSAGES[Math.floor(Math.random() * MESSAGES.length)], 5000);
+// 複数行メッセージを順に表示する
+function showMessageSequence(lines, intervalMs, onComplete) {
+  clearTimeout(msgSeqTimer);
+  let i = 0;
+
+  function showNext() {
+    if (i >= lines.length) {
+      hideBubble();
+      if (onComplete) onComplete();
+      return;
+    }
+    showBubble(lines[i], intervalMs + 500);
+    i++;
+    msgSeqTimer = setTimeout(showNext, intervalMs);
+  }
+  showNext();
+}
+
+// MESSAGESからランダムに1つ選んで表示（配列なら順に表示）
+function showRandomMessage(onComplete) {
+  clearTimeout(msgSeqTimer);
+  const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+  if (Array.isArray(msg)) {
+    showMessageSequence(msg, MSG_INTERVAL_MS, onComplete);
+  } else {
+    showBubble(msg, 5000);
+    if (onComplete) msgSeqTimer = setTimeout(onComplete, 5500);
+  }
 }
 
 // =====================================================
@@ -283,9 +345,11 @@ function startWalk() {
 function scheduleRandomTalk() {
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
-    if (state === 'walk' || state === 'idle') showRandomMessage();
+    if (state === 'walk' || state === 'idle') {
+      showRandomMessage();
+    }
     scheduleRandomTalk();
-  }, 8000 + Math.random() * 12000);
+  }, 9000 + Math.random() * 12000);
 }
 
 function goIdle() {
@@ -297,34 +361,45 @@ function goIdle() {
 }
 
 // =====================================================
-// アクション（フリーズしないよう確実にアニメーション）
+// アクション（コメントを順に表示してから徘徊）
 // =====================================================
 function doAction(type) {
-  // 既存アクションをクリア
   clearInterval(actionAnim);
   clearTimeout(actionTimer);
   clearTimeout(idleTimer);
+  clearTimeout(msgSeqTimer);
   stopBlink();
   state = 'action';
+
+  const comments = ACTION_COMMENTS[type] || ['……'];
 
   if (type === 'book') {
     const frames = [IMGS.readBook1, IMGS.readBook2];
     let f = 0;
     setImg(frames[0]);
     actionAnim = setInterval(() => { setImg(frames[f++ % 2]); }, 600);
-    showBubble('セールのゲーム……たくさんあるねぇ……', 8000);
   } else if (type === 'game') {
     const frames = [IMGS.gameplay1, IMGS.gameplay2];
     let f = 0;
     setImg(frames[0]);
     actionAnim = setInterval(() => { setImg(frames[f++ % 2]); }, 500);
-    showBubble('ゲームしてる……邪魔しないでよ……', 8000);
   }
 
-  // 10秒後に自動で徘徊に戻る
+  // コメントを順に表示し、全部終わったら徘徊に戻る
+  showMessageSequence(comments, MSG_INTERVAL_MS, () => {
+    // コメント終了後もアニメーションを少し続けてから戻る
+    actionTimer = setTimeout(() => {
+      clearInterval(actionAnim);
+      actionAnim = null;
+      returnToWalk();
+    }, 2000);
+  });
+
+  // 最大時間（万が一のフォールバック）
   actionTimer = setTimeout(() => {
     clearInterval(actionAnim);
     actionAnim = null;
+    clearTimeout(msgSeqTimer);
     returnToWalk();
   }, ACTION_RETURN_MS);
 }
@@ -332,6 +407,7 @@ function doAction(type) {
 function returnToWalk() {
   clearInterval(actionAnim);
   actionAnim = null;
+  clearTimeout(msgSeqTimer);
   state = 'walk';
   stopBlink();
   setNewTarget();
@@ -343,6 +419,7 @@ function returnToWalk() {
 // =====================================================
 function loop() {
   animFrame = requestAnimationFrame(loop);
+  if (state === 'drag') return; // ドラッグ中はonMoveで更新
   if (state !== 'walk') {
     petEl.style.left = posX + 'px';
     petEl.style.top  = posY + 'px';
@@ -374,23 +451,19 @@ function stopAll() {
   cancelAnimationFrame(animFrame); animFrame = null;
   clearTimeout(actionTimer); clearTimeout(blinkTimer);
   clearTimeout(bubbleTimer); clearTimeout(idleTimer);
-  clearInterval(actionAnim); actionAnim = null;
+  clearTimeout(msgSeqTimer); clearInterval(actionAnim); actionAnim = null;
 }
 
 // =====================================================
 // ドロップゾーン判定
-// キャラクター中心とゾーンの矩形で重なりを判定
 // =====================================================
 function getOverlappingZone() {
-  // キャラクターの中心座標（viewport座標）
   const cx = posX + PET_SIZE / 2;
   const cy = posY + PET_SIZE / 2;
-
   for (const def of DROP_ZONE_DEFS) {
     const el = document.getElementById(def.id);
     if (!el) continue;
     const r = el.getBoundingClientRect();
-    // マージンを加えて判定しやすくする
     if (cx >= r.left   - DROP_HIT_MARGIN &&
         cx <= r.right  + DROP_HIT_MARGIN &&
         cy >= r.top    - DROP_HIT_MARGIN &&
@@ -401,7 +474,6 @@ function getOverlappingZone() {
   return null;
 }
 
-// ドラッグ中の視覚更新（重なりチェック）
 function updateZoneVisuals() {
   const over = getOverlappingZone();
   DROP_ZONE_DEFS.forEach(def => {
@@ -409,10 +481,10 @@ function updateZoneVisuals() {
     const img = box ? box.querySelector('.dz-icon') : null;
     if (!box) return;
     const isOver = over && over.id === def.id;
-    box.style.borderColor = isOver ? '#818cf8'             : 'rgba(129,140,248,0.4)';
-    box.style.background  = isOver ? 'rgba(129,140,248,0.2)' : 'rgba(10,14,23,0.8)';
-    box.style.transform   = isOver ? 'scale(1.12)'         : 'scale(1)';
-    if (img) img.style.opacity = isOver ? '0' : '1'; // 乗ってる間アイコン非表示
+    box.style.borderColor = isOver ? '#818cf8'              : 'rgba(129,140,248,0.45)';
+    box.style.background  = isOver ? 'rgba(129,140,248,0.22)' : 'rgba(10,14,23,0.82)';
+    box.style.transform   = isOver ? 'scale(1.1)'           : 'scale(1)';
+    if (img) img.style.opacity = isOver ? '0' : '1';
   });
 }
 
@@ -421,8 +493,8 @@ function clearZoneVisuals() {
     const box = document.getElementById(def.id);
     const img = box ? box.querySelector('.dz-icon') : null;
     if (box) {
-      box.style.borderColor = 'rgba(129,140,248,0.4)';
-      box.style.background  = 'rgba(10,14,23,0.8)';
+      box.style.borderColor = 'rgba(129,140,248,0.45)';
+      box.style.background  = 'rgba(10,14,23,0.82)';
       box.style.transform   = 'scale(1)';
     }
     if (img) img.style.opacity = '1';
@@ -438,13 +510,12 @@ function setupDrag() {
     dragOffX = clientX - posX;
     dragOffY = clientY - posY;
     petEl.style.cursor = 'grabbing';
-    // stateをdragにしてループを維持しつつ歩きを止める
     state = 'drag';
     stopBlink();
     clearTimeout(actionTimer);
     clearTimeout(idleTimer);
-    clearInterval(actionAnim);
-    actionAnim = null;
+    clearTimeout(msgSeqTimer);
+    clearInterval(actionAnim); actionAnim = null;
   }
 
   function onMove(clientX, clientY) {
@@ -462,22 +533,18 @@ function setupDrag() {
     if (!isDragging) return;
     isDragging = false;
     petEl.style.cursor = 'grab';
-
     const zone = getOverlappingZone();
     clearZoneVisuals();
-
     if (zone) {
-      // アクション発動
       doAction(zone.action);
     } else {
       setImg(IMGS.smile);
       showBubble('どこに連れてくの〜？', 3000);
       state = 'action';
-      actionTimer = setTimeout(() => returnToWalk(), 2000);
+      actionTimer = setTimeout(() => returnToWalk(), 2500);
     }
   }
 
-  // マウス
   petEl.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
     onStart(e.clientX, e.clientY);
@@ -486,7 +553,6 @@ function setupDrag() {
   document.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
   document.addEventListener('mouseup',   () => onEnd());
 
-  // タッチ
   petEl.addEventListener('touchstart', (e) => {
     const t = e.touches[0];
     onStart(t.clientX, t.clientY);
@@ -519,12 +585,6 @@ function setupClick() {
 }
 
 // =====================================================
-// ループ修正（dragステートに対応）
-// =====================================================
-// loop関数内でstate === 'drag'の時は位置更新のみ行う
-// （既にonMoveで更新しているので何もしない）
-
-// =====================================================
 // 初期化
 // =====================================================
 function initPet() {
@@ -536,10 +596,8 @@ function initPet() {
   buildPetDOM();
   buildToggleBtn();
 
-  // フィルターパネルが描画された後にドロップゾーンを配置
-  setTimeout(() => {
-    buildDropZones();
-  }, 300);
+  // フィルターパネル描画後にゾーン配置
+  setTimeout(() => { buildDropZones(); }, 400);
 
   setupDrag();
   setupClick();
@@ -548,45 +606,6 @@ function initPet() {
     showBubble('こんにちは！セール情報を一緒にチェックしよ！', 4000);
     setTimeout(() => startWalk(), 2000);
   }, 1000);
-}
-
-// =====================================================
-// ループ（drag対応版）
-// =====================================================
-function loop() {
-  animFrame = requestAnimationFrame(loop);
-
-  // drag中はonMoveで位置更新済みなので何もしない
-  if (state === 'drag') return;
-
-  if (state !== 'walk') {
-    petEl.style.left = posX + 'px';
-    petEl.style.top  = posY + 'px';
-    updateBubblePos();
-    return;
-  }
-
-  const dx = targetX - posX, dy = targetY - posY;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-
-  if (dist < PET_SPEED * 2) {
-    goIdle();
-  } else {
-    posX += (dx / dist) * PET_SPEED;
-    posY += (dy / dist) * PET_SPEED;
-    if (Math.abs(dx) > Math.abs(dy) * 0.5) {
-      direction = dx > 0 ? 'right' : 'left';
-      setImg(dx > 0 ? IMGS.walkRight : IMGS.walkLeft);
-    } else if (dy < -10) {
-      setImg(IMGS.walkBack);
-    } else {
-      setImg(direction === 'right' ? IMGS.walkRight : IMGS.walkLeft);
-    }
-  }
-
-  petEl.style.left = posX + 'px';
-  petEl.style.top  = posY + 'px';
-  updateBubblePos();
 }
 
 if (document.readyState === 'loading') {
