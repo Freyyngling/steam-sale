@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow, noarchive">
 <title>Steam セール — 割引率順</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
@@ -216,6 +215,54 @@
   #status-bar.visible { display: block; }
   #status-bar.error { color: #f87171; }
   #status-bar.ok { color: var(--accent); }
+
+  /* ===================== バナー背景 ===================== */
+  .banner-wrap {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: transparent;
+    flex-shrink: 0;
+    transition: height 0.1s;
+  }
+
+  .banner-wrap .banner-media {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: auto;
+    transform: translateY(-50%);
+    display: block;
+    object-fit: cover;
+    object-position: center center;
+    min-height: 100%;
+  }
+
+  /* 動画の場合も同じスタイル */
+  .banner-wrap video.banner-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    top: 0;
+    transform: none;
+  }
+
+  .banner-fade {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 55%;
+    background: linear-gradient(to bottom, transparent, #0a0e17);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* バナーが空の時は非表示 */
+  .banner-wrap.empty {
+    height: 0 !important;
+  }
 
   .sort-bar {
     background: var(--surface2);
@@ -717,11 +764,11 @@
       <div class="news-content" id="news-content">
         <!-- ここにお知らせを追加してください。同じ内容を2回書くとループがつながります -->
         <span class="news-item">⚠️ データ取得日時と実際の表示時間には差がある場合があります。購入前に必ず Steam ストアで価格をご確認ください。</span>
-        <span class="news-item">📌 現在まだこのページは工事中、準備中。6月25日辺りに来るサマーセールまでの間で1回、どこかで更新しようかな〜と思ってます。</span>
+        <span class="news-item">📌 セール情報を最新にするには fetch.bat を実行後「表示を更新」を押してください。</span>
         <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
         <!-- ループ用（同じ内容をもう一度） -->
         <span class="news-item">⚠️ データ取得日時と実際の表示時間には差がある場合があります。購入前に必ず Steam ストアで価格をご確認ください。</span>
-        <span class="news-item">📌 現在まだこのページは工事中、準備中。6月25日辺りに来るサマーセールまでの間で1回、どこかで更新しようかな〜と思ってます。</span>
+        <span class="news-item">📌 セール情報を最新にするには fetch.bat を実行後「表示を更新」を押してください。</span>
         <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
       </div>
     </div>
@@ -742,7 +789,7 @@
 <div id="status-bar"></div>
 
 <!-- バナー背景 -->
-<div class="banner-wrap" id="banner-wrap">
+<div class="banner-wrap empty" id="banner-wrap">
   <!-- ここにimg or videoが動的に挿入される -->
   <div class="banner-fade"></div>
 </div>
@@ -1293,49 +1340,75 @@ loadData();
 
     let mediaEl  = null;
     let savedUrl = null;
+    let currentH = 200;
 
     // 高さ復元
     const savedH = localStorage.getItem('banner-height');
     if (savedH) {
-      wrap.style.height    = savedH + 'px';
-      slider.value         = savedH;
-      valLabel.textContent = savedH + 'px';
+      currentH = parseInt(savedH);
+      slider.value = currentH;
+      valLabel.textContent = currentH + 'px';
+    }
+
+    // 高さ適用関数
+    function applyHeight(h) {
+      currentH = parseInt(h);
+      if (mediaEl) {
+        wrap.classList.remove('empty');
+        wrap.style.height = currentH + 'px';
+      }
+      valLabel.textContent = currentH + 'px';
+      localStorage.setItem('banner-height', currentH);
     }
 
     // 高さスライダー
     slider.addEventListener('input', function() {
-      const h = this.value;
-      wrap.style.height    = h + 'px';
-      valLabel.textContent = h + 'px';
-      localStorage.setItem('banner-height', h);
+      applyHeight(this.value);
     });
 
     // ファイル選択
     fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
-      if (mediaEl)  { mediaEl.remove(); mediaEl = null; }
-      if (savedUrl) { URL.revokeObjectURL(savedUrl); }
+
+      // 既存メディアを削除
+      if (mediaEl) { mediaEl.remove(); mediaEl = null; }
+      if (savedUrl) { URL.revokeObjectURL(savedUrl); savedUrl = null; }
+
       savedUrl = URL.createObjectURL(file);
       const isVideo = file.type.startsWith('video/');
+
       if (isVideo) {
         mediaEl = document.createElement('video');
-        mediaEl.autoplay = true; mediaEl.loop = true;
-        mediaEl.muted = true; mediaEl.playsInline = true;
-        mediaEl.src = savedUrl;
+        mediaEl.autoplay    = true;
+        mediaEl.loop        = true;
+        mediaEl.muted       = true;
+        mediaEl.playsInline = true;
+        mediaEl.src         = savedUrl;
       } else {
         mediaEl = document.createElement('img');
         mediaEl.src = savedUrl;
+        mediaEl.alt = '';
       }
+
       mediaEl.className = 'banner-media';
-      wrap.insertBefore(mediaEl, wrap.querySelector('.banner-fade'));
+
+      // フェードより前に挿入
+      const fade = wrap.querySelector('.banner-fade');
+      wrap.insertBefore(mediaEl, fade);
+
+      // 空クラスを外して高さを適用
+      wrap.classList.remove('empty');
+      wrap.style.height = currentH + 'px';
+
       fileInput.value = '';
     });
 
-    // 削除
+    // 背景削除
     removeBtn.addEventListener('click', function() {
       if (mediaEl)  { mediaEl.remove(); mediaEl = null; }
       if (savedUrl) { URL.revokeObjectURL(savedUrl); savedUrl = null; }
+      wrap.classList.add('empty');
     });
   });
   </script>
