@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow, noarchive">
 <title>Steam セール — 割引率順</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
@@ -771,11 +770,11 @@
       <div class="news-content" id="news-content">
         <!-- ここにお知らせを追加してください。同じ内容を2回書くとループがつながります -->
         <span class="news-item">⚠️ データ取得日時と実際の表示時間には差がある場合があります。購入前に必ず Steam ストアで価格をご確認ください。</span>
-        <span class="news-item">📌 只今、実験的稼働中。次回更新は6月25日のサマーセールまでの間のどこかで1回更新予定中m(_ _;)m</span>
+        <span class="news-item">📌 セール情報を最新にするには fetch.bat を実行後「表示を更新」を押してください。</span>
         <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
         <!-- ループ用（同じ内容をもう一度） -->
         <span class="news-item">⚠️ データ取得日時と実際の表示時間には差がある場合があります。購入前に必ず Steam ストアで価格をご確認ください。</span>
-        <span class="news-item">📌 只今、実験的稼働中。次回更新は6月25日のサマーセールまでの間のどこかで1回更新予定中m(_ _;)m</span>
+        <span class="news-item">📌 セール情報を最新にするには fetch.bat を実行後「表示を更新」を押してください。</span>
         <span class="news-item">🎮 日本語フィルターや割引率スライダーで絞り込みができます。</span>
       </div>
     </div>
@@ -817,6 +816,15 @@
 
   <!-- バナー設定（右側） -->
   <div id="banner-controls" style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <!-- プリセット選択 -->
+    <select id="banner-preset-select" style="background:rgba(10,14,23,0.85);border:1px solid rgba(129,140,248,0.4);color:#94a3b8;font-family:'Noto Sans JP',sans-serif;font-size:11px;padding:5px 8px;border-radius:6px;cursor:pointer;outline:none;">
+      <option value="">プリセット背景</option>
+      <option value="bg1.png">bg1</option>
+      <option value="bg2.png">bg2</option>
+      <option value="bg3.png">bg3</option>
+      <option value="">なし</option>
+    </select>
+    <!-- アップロード -->
     <label class="banner-upload-btn" for="banner-file-input" style="white-space:nowrap;font-size:11px;padding:5px 10px;background:rgba(129,140,248,0.12);border:1px solid rgba(129,140,248,0.4);color:#94a3b8;border-radius:6px;cursor:pointer;">
       🖼 背景
     </label>
@@ -1400,30 +1408,59 @@ loadData();
       return el;
     }
 
+    // メディアをフィルターパネルに適用する共通関数
+    function applyMedia(url, isVideo) {
+      if (fpMediaEl) { fpMediaEl.remove(); fpMediaEl = null; }
+      fpMediaEl = createMedia(url, isVideo);
+      const overlay = fpBgLayer.querySelector('.fp-overlay');
+      fpBgLayer.insertBefore(fpMediaEl, overlay);
+      applyVPos(slider.value);
+    }
+
+    // プリセット選択
+    const presetSelect = document.getElementById('banner-preset-select');
+    if (presetSelect) {
+      presetSelect.addEventListener('change', function() {
+        const val = this.value;
+
+        // アップロード画像をクリア
+        if (fpMediaEl && savedUrl) {
+          fpMediaEl.remove(); fpMediaEl = null;
+          URL.revokeObjectURL(savedUrl); savedUrl = null;
+        }
+
+        if (!val) {
+          // 「なし」選択 → 背景を消す
+          if (fpMediaEl) { fpMediaEl.remove(); fpMediaEl = null; }
+          return;
+        }
+
+        // プリセット画像を適用（GitHub Pages上のファイルを参照）
+        const isVideo = val.endsWith('.mp4') || val.endsWith('.webm');
+        applyMedia(val, isVideo);
+      });
+    }
+
+    // ブラウザアップロード
     fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
 
-      if (fpMediaEl) { fpMediaEl.remove(); fpMediaEl = null; }
-      if (savedUrl)  { URL.revokeObjectURL(savedUrl); }
+      // プリセット選択をリセット
+      if (presetSelect) presetSelect.value = '';
 
-      savedUrl  = URL.createObjectURL(file);
+      if (savedUrl) URL.revokeObjectURL(savedUrl);
+      savedUrl = URL.createObjectURL(file);
       const isVideo = file.type.startsWith('video/');
 
-      fpMediaEl = createMedia(savedUrl, isVideo);
-
-      const overlay = fpBgLayer.querySelector('.fp-overlay');
-      fpBgLayer.insertBefore(fpMediaEl, overlay);
-
-      // 現在のスライダー位置を適用
-      applyVPos(slider.value);
-
+      applyMedia(savedUrl, isVideo);
       fileInput.value = '';
     });
 
     removeBtn.addEventListener('click', function() {
       if (fpMediaEl) { fpMediaEl.remove(); fpMediaEl = null; }
       if (savedUrl)  { URL.revokeObjectURL(savedUrl); savedUrl = null; }
+      if (presetSelect) presetSelect.value = '';
     });
   });
   </script>
