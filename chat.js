@@ -1,20 +1,24 @@
 // =====================================================
 // Steam セール観測所 - キャラクターチャットシステム
-// chat.js  v2
+// chat.js  v3
 // =====================================================
 
 (function() {
 
-let chatData     = null;
-let chatOpen     = false;
-let chatHistory  = [];
-let isTyping     = false;
+let chatData    = null;
+let chatOpen    = false;
+let chatHistory = [];
+let isTyping    = false;
 
 let chatWrap     = null;
 let chatMessages = null;
 let chatInput    = null;
 let chatSend     = null;
 let choicesWrap  = null;
+
+// アバターアニメーション用
+let avatarAnimTimer = null;
+let avatarFrame     = 0;
 
 // =====================================================
 // chat_data.json 読み込み
@@ -41,7 +45,7 @@ function injectStyles() {
       position: fixed;
       bottom: 60px;
       left: 20px;
-      width: 320px;
+      width: 380px;
       z-index: 9500;
       display: none;
       flex-direction: column;
@@ -66,35 +70,53 @@ function injectStyles() {
     #chat-header {
       background: linear-gradient(135deg,rgba(129,140,248,0.2),rgba(56,189,248,0.1));
       border-bottom: 1px solid rgba(129,140,248,0.3);
-      padding: 10px 14px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      cursor: grab;
+      user-select: none;
     }
+    #chat-header:active { cursor: grabbing; }
+
     #chat-header-avatar {
-      width: 36px; height: 36px;
-      object-fit: contain; image-rendering: pixelated;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
       flex-shrink: 0;
-      transition: all 0.2s;
+      transition: none;
     }
-    #chat-header-name { font-size:13px; font-weight:700; color:#e2e8f0; }
-    #chat-header-status { font-size:10px; color:#64748b; margin-top:1px; }
+
+    #chat-header-info { flex: 1; }
+    #chat-header-name { font-size:15px; font-weight:700; color:#e2e8f0; }
+    #chat-header-status { font-size:11px; color:#64748b; margin-top:2px; }
     #chat-header-status.typing { color:#818cf8; }
-    #chat-close-btn {
-      margin-left:auto; background:none; border:none;
-      color:#64748b; cursor:pointer; font-size:16px;
-      padding:2px 4px; border-radius:4px; transition:color 0.15s; line-height:1;
+
+    .chat-header-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #64748b;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.15s;
+      line-height: 1;
+      flex-shrink: 0;
     }
-    #chat-close-btn:hover { color:#f87171; }
+    .chat-header-btn:hover { color: #e2e8f0; border-color: rgba(255,255,255,0.3); }
+    #chat-clear-btn:hover { color: #fbbf24; border-color: #fbbf24; }
+    #chat-close-btn:hover { color: #f87171; border-color: #f87171; }
 
     #chat-messages {
-      height: 280px;
+      height: 340px;
       overflow-y: auto;
-      padding: 12px 12px 4px;
+      padding: 14px 14px 6px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       scrollbar-width: thin;
       scrollbar-color: rgba(129,140,248,0.2) transparent;
     }
@@ -103,7 +125,7 @@ function injectStyles() {
 
     .chat-msg {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: flex-end;
       animation: msgFadeIn 0.2s ease;
     }
@@ -114,39 +136,44 @@ function injectStyles() {
     .chat-msg.user { flex-direction: row-reverse; }
 
     .chat-msg-avatar {
-      width:28px; height:28px;
-      object-fit:contain; image-rendering:pixelated;
-      flex-shrink:0;
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      flex-shrink: 0;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     }
+
     .chat-msg-bubble {
-      max-width:220px; padding:8px 12px;
-      border-radius:14px; font-size:12px;
-      line-height:1.6; color:#e2e8f0; word-break:break-all;
+      max-width: 260px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #e2e8f0;
+      word-break: break-all;
     }
     .chat-msg.char .chat-msg-bubble {
-      background:rgba(129,140,248,0.15);
-      border:1px solid rgba(129,140,248,0.25);
-      border-bottom-left-radius:4px;
+      background: rgba(129,140,248,0.15);
+      border: 1px solid rgba(129,140,248,0.25);
+      border-bottom-left-radius: 4px;
     }
     .chat-msg.user .chat-msg-bubble {
-      background:rgba(56,189,248,0.15);
-      border:1px solid rgba(56,189,248,0.25);
-      border-bottom-right-radius:4px;
-      text-align:right;
+      background: rgba(56,189,248,0.15);
+      border: 1px solid rgba(56,189,248,0.25);
+      border-bottom-right-radius: 4px;
+      text-align: right;
     }
 
-    .typing-indicator {
-      display:flex; align-items:center; gap:8px; padding:4px 0;
-    }
+    .typing-indicator { display:flex; align-items:center; gap:8px; padding:4px 0; }
     .typing-dots {
-      display:flex; gap:3px; padding:8px 12px;
+      display:flex; gap:3px; padding:10px 14px;
       background:rgba(129,140,248,0.12);
       border:1px solid rgba(129,140,248,0.2);
-      border-radius:14px; border-bottom-left-radius:4px;
+      border-radius:16px; border-bottom-left-radius:4px;
     }
     .typing-dots span {
-      width:6px; height:6px; background:#818cf8;
+      width:7px; height:7px; background:#818cf8;
       border-radius:50%;
       animation:dotBounce 1.2s ease-in-out infinite;
     }
@@ -154,32 +181,38 @@ function injectStyles() {
     .typing-dots span:nth-child(3) { animation-delay:0.4s; }
     @keyframes dotBounce {
       0%,60%,100% { transform:translateY(0); opacity:0.4; }
-      30% { transform:translateY(-6px); opacity:1; }
+      30% { transform:translateY(-7px); opacity:1; }
     }
-    .typing-label { font-size:10px; color:#818cf8; }
+    .typing-label { font-size:11px; color:#818cf8; }
 
     #chat-choices {
-      padding:8px 12px;
-      display:flex; flex-wrap:wrap; gap:6px;
-      border-top:1px solid rgba(255,255,255,0.05);
-      max-height:120px; overflow-y:auto;
-      scrollbar-width:thin;
-      scrollbar-color:rgba(129,140,248,0.2) transparent;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      max-height: 130px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(129,140,248,0.2) transparent;
     }
     .choice-btn {
-      background:rgba(129,140,248,0.1);
-      border:1px solid rgba(129,140,248,0.3);
-      color:#94a3b8;
-      font-family:'Noto Sans JP',sans-serif;
-      font-size:11px; padding:5px 10px;
-      border-radius:20px; cursor:pointer;
-      transition:all 0.15s; white-space:nowrap;
-      animation:choiceFadeIn 0.2s ease both;
+      background: rgba(129,140,248,0.1);
+      border: 1px solid rgba(129,140,248,0.3);
+      color: #94a3b8;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      animation: choiceFadeIn 0.2s ease both;
     }
     .choice-btn:hover {
-      background:rgba(129,140,248,0.25);
-      border-color:#818cf8; color:#e2e8f0;
-      transform:translateY(-1px);
+      background: rgba(129,140,248,0.25);
+      border-color: #818cf8; color: #e2e8f0;
+      transform: translateY(-1px);
     }
     @keyframes choiceFadeIn {
       from { opacity:0; transform:scale(0.9); }
@@ -187,51 +220,57 @@ function injectStyles() {
     }
 
     #chat-input-row {
-      display:flex; gap:6px;
-      padding:8px 12px 10px;
-      border-top:1px solid rgba(255,255,255,0.05);
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px 12px;
+      border-top: 1px solid rgba(255,255,255,0.05);
     }
     #chat-input {
-      flex:1;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(129,140,248,0.25);
-      border-radius:20px; color:#e2e8f0;
-      font-family:'Noto Sans JP',sans-serif;
-      font-size:12px; padding:7px 14px;
-      outline:none; transition:border-color 0.15s;
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(129,140,248,0.25);
+      border-radius: 22px;
+      color: #e2e8f0;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 13px;
+      padding: 8px 16px;
+      outline: none;
+      transition: border-color 0.15s;
     }
-    #chat-input:focus { border-color:rgba(129,140,248,0.6); }
-    #chat-input::placeholder { color:#64748b; }
+    #chat-input:focus { border-color: rgba(129,140,248,0.6); }
+    #chat-input::placeholder { color: #64748b; }
     #chat-send {
-      background:linear-gradient(135deg,#818cf8,#38bdf8);
-      border:none; border-radius:50%;
-      width:34px; height:34px; color:#fff;
-      font-size:14px; cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      flex-shrink:0; transition:opacity 0.15s,transform 0.15s;
+      background: linear-gradient(135deg,#818cf8,#38bdf8);
+      border: none; border-radius: 50%;
+      width: 38px; height: 38px;
+      color: #fff; font-size: 15px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.15s, transform 0.15s;
     }
     #chat-send:hover { opacity:0.85; transform:scale(1.05); }
     #chat-send:disabled { opacity:0.4; cursor:default; transform:none; }
 
     #chat-toggle-hint {
-      position:fixed; z-index:9400;
-      pointer-events:none; opacity:0;
-      transition:opacity 0.3s;
-      background:rgba(10,14,23,0.92);
-      border:1px solid rgba(129,140,248,0.5);
-      border-radius:10px; padding:4px 10px;
-      font-size:11px; color:#818cf8;
-      font-family:'Noto Sans JP',sans-serif;
-      white-space:nowrap;
+      position: fixed; z-index: 9400;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.3s;
+      background: rgba(10,14,23,0.92);
+      border: 1px solid rgba(129,140,248,0.5);
+      border-radius: 10px; padding: 5px 12px;
+      font-size: 12px; color: #818cf8;
+      font-family: 'Noto Sans JP', sans-serif;
+      white-space: nowrap;
     }
     #chat-toggle-hint.show { opacity:1; }
 
-    .emotion-bounce { animation:emotionBounce 0.4s ease; }
+    .emotion-bounce { animation: emotionBounce 0.4s ease; }
     @keyframes emotionBounce {
-      0%   { transform:scale(1); }
-      40%  { transform:scale(1.15) rotate(-3deg); }
-      70%  { transform:scale(0.95) rotate(2deg); }
-      100% { transform:scale(1) rotate(0deg); }
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.15) rotate(-3deg); }
+      70%  { transform: scale(0.95) rotate(2deg); }
+      100% { transform: scale(1) rotate(0deg); }
     }
   `;
   document.head.appendChild(style);
@@ -249,11 +288,12 @@ function buildChatUI() {
     <div id="chat-window">
       <div id="chat-header">
         <img id="chat-header-avatar" src="front-smile.png" alt="avatar">
-        <div>
+        <div id="chat-header-info">
           <div id="chat-header-name">セール観測員</div>
           <div id="chat-header-status">オンライン</div>
         </div>
-        <button id="chat-close-btn" title="閉じる">✕</button>
+        <button class="chat-header-btn" id="chat-clear-btn" title="履歴をクリア">🗑</button>
+        <button class="chat-header-btn" id="chat-close-btn" title="閉じる">✕</button>
       </div>
       <div id="chat-messages"></div>
       <div id="chat-choices"></div>
@@ -276,13 +316,66 @@ function buildChatUI() {
   choicesWrap  = document.getElementById('chat-choices');
 
   document.getElementById('chat-close-btn').addEventListener('click', closeChat);
+  document.getElementById('chat-clear-btn').addEventListener('click', clearHistory);
   chatSend.addEventListener('click', onSendInput);
   chatInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') onSendInput();
   });
 
-  // ヘッダーをドラッグして移動できるようにする
   setupChatDrag();
+}
+
+// =====================================================
+// アバターアニメーション（2枚交互）
+// =====================================================
+const EMOTION_MAP = {
+  neutral:     ['front-neutral.png',     'front-blink-half.png'],
+  smile:       ['front-smile.png',       'front-blink-closed.png'],
+  happy1:      ['front-happy1.png',      'front-happy2.png'],
+  happy2:      ['front-happy2.png',      'front-happy1.png'],
+  surprised:   ['front-surprised.png',   'front-neutral.png'],
+  sleepy:      ['front-sleepy.png',      'front-sleep.png'],
+  sleep:       ['front-sleep.png',       'front-sleepy.png'],
+  angry1:      ['front-angry1.png',      'front-angry2.png'],
+  angry2:      ['front-angry2.png',      'front-angry1.png'],
+  cry1:        ['front-cry1.png',        'front-cry2.png'],
+  cry2:        ['front-cry2.png',        'front-cry1.png'],
+};
+
+let currentEmotionFrames = EMOTION_MAP.smile;
+
+function startAvatarAnim() {
+  stopAvatarAnim();
+  avatarFrame = 0;
+  avatarAnimTimer = setInterval(() => {
+    const avatar = document.getElementById('chat-header-avatar');
+    if (avatar) {
+      avatar.src = currentEmotionFrames[avatarFrame % 2];
+      avatarFrame++;
+    }
+  }, 600);
+}
+
+function stopAvatarAnim() {
+  clearInterval(avatarAnimTimer);
+  avatarAnimTimer = null;
+}
+
+function setEmotion(key) {
+  const frames = EMOTION_MAP[key] || EMOTION_MAP.neutral;
+  currentEmotionFrames = frames;
+
+  const petEl  = document.getElementById('pet-char');
+  const avatar = document.getElementById('chat-header-avatar');
+
+  if (petEl) {
+    petEl.src = frames[0];
+    petEl.classList.remove('emotion-bounce');
+    void petEl.offsetWidth;
+    petEl.classList.add('emotion-bounce');
+    petEl.addEventListener('animationend', () => petEl.classList.remove('emotion-bounce'), { once: true });
+  }
+  if (avatar) avatar.src = frames[0];
 }
 
 // =====================================================
@@ -292,71 +385,51 @@ function setupChatDrag() {
   const header = document.getElementById('chat-header');
   if (!header) return;
 
-  let dragging  = false;
-  let startX    = 0;
-  let startY    = 0;
-  let initLeft  = 0;
-  let initBottom = 0;
+  let dragging = false;
+  let startX = 0, startY = 0;
+  let initLeft = 0, initBottom = 0;
 
-  function getWrapPos() {
-    const style = window.getComputedStyle(chatWrap);
-    return {
-      left:   parseInt(style.left)   || 0,
-      bottom: parseInt(style.bottom) || 0,
-    };
+  function getPos() {
+    const s = window.getComputedStyle(chatWrap);
+    return { left: parseInt(s.left) || 0, bottom: parseInt(s.bottom) || 0 };
   }
 
-  function onDragStart(clientX, clientY) {
-    dragging   = true;
-    startX     = clientX;
-    startY     = clientY;
-    const pos  = getWrapPos();
-    initLeft   = pos.left;
-    initBottom = pos.bottom;
-    header.style.cursor = 'grabbing';
+  function onStart(cx, cy) {
+    dragging = true;
+    startX = cx; startY = cy;
+    const p = getPos();
+    initLeft = p.left; initBottom = p.bottom;
   }
 
-  function onDragMove(clientX, clientY) {
+  function onMove(cx, cy) {
     if (!dragging) return;
-    const dx  = clientX - startX;
-    const dy  = clientY - startY;  // 下に動かすとbottomは減る
-    const newLeft   = Math.max(0, Math.min(window.innerWidth  - 320, initLeft   + dx));
-    const newBottom = Math.max(0, Math.min(window.innerHeight - 100, initBottom - dy));
-    chatWrap.style.left   = newLeft   + 'px';
-    chatWrap.style.bottom = newBottom + 'px';
+    const dx = cx - startX, dy = cy - startY;
+    chatWrap.style.left   = Math.max(0, Math.min(window.innerWidth  - 380, initLeft   + dx)) + 'px';
+    chatWrap.style.bottom = Math.max(0, Math.min(window.innerHeight - 100, initBottom - dy)) + 'px';
     chatWrap.style.top    = 'auto';
   }
 
-  function onDragEnd() {
-    if (!dragging) return;
-    dragging = false;
-    header.style.cursor = 'grab';
-  }
+  function onEnd() { dragging = false; }
 
-  // マウス
-  header.style.cursor = 'grab';
-  header.style.userSelect = 'none';
   header.addEventListener('mousedown', (e) => {
-    // 閉じるボタンはドラッグしない
-    if (e.target.id === 'chat-close-btn') return;
-    onDragStart(e.clientX, e.clientY);
+    if (e.target.closest('.chat-header-btn')) return;
+    onStart(e.clientX, e.clientY);
     e.preventDefault();
   });
-  document.addEventListener('mousemove', (e) => onDragMove(e.clientX, e.clientY));
-  document.addEventListener('mouseup',   () => onDragEnd());
+  document.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+  document.addEventListener('mouseup', onEnd);
 
-  // タッチ
   header.addEventListener('touchstart', (e) => {
-    if (e.target.id === 'chat-close-btn') return;
+    if (e.target.closest('.chat-header-btn')) return;
     const t = e.touches[0];
-    onDragStart(t.clientX, t.clientY);
+    onStart(t.clientX, t.clientY);
   }, { passive: true });
   document.addEventListener('touchmove', (e) => {
     if (!dragging) return;
     const t = e.touches[0];
-    onDragMove(t.clientX, t.clientY);
+    onMove(t.clientX, t.clientY);
   }, { passive: true });
-  document.addEventListener('touchend', () => onDragEnd());
+  document.addEventListener('touchend', onEnd);
 }
 
 // =====================================================
@@ -367,6 +440,7 @@ function openChat() {
   chatOpen = true;
   chatWrap.classList.add('open');
   positionChatWrap();
+  startAvatarAnim();
   if (chatHistory.length === 0) {
     setTimeout(() => respond('start'), 400);
   }
@@ -375,16 +449,28 @@ function openChat() {
 function closeChat() {
   chatOpen = false;
   chatWrap.classList.remove('open');
+  stopAvatarAnim();
 }
 
 function positionChatWrap() {
   const petEl = document.getElementById('pet-char');
   if (!petEl) return;
-  const r   = petEl.getBoundingClientRect();
-  const left = Math.max(10, Math.min(window.innerWidth - 330, r.left - 10));
+  const r    = petEl.getBoundingClientRect();
+  const left = Math.max(10, Math.min(window.innerWidth - 390, r.left - 10));
   chatWrap.style.left   = left + 'px';
   chatWrap.style.bottom = (window.innerHeight - r.top + 10) + 'px';
   chatWrap.style.top    = 'auto';
+}
+
+// =====================================================
+// 履歴クリア
+// =====================================================
+function clearHistory() {
+  chatHistory  = [];
+  chatMessages.innerHTML = '';
+  choicesWrap.innerHTML  = '';
+  // クリア後に挨拶から再スタート
+  setTimeout(() => respond('start'), 300);
 }
 
 // =====================================================
@@ -434,62 +520,42 @@ function hideTyping() {
 // =====================================================
 // 選択肢表示
 // =====================================================
-function showChoices(nexts) {
+function showChoices(nextOptions) {
   choicesWrap.innerHTML = '';
-  if (!nexts || nexts.length === 0) return;
-  nexts.forEach((choice, i) => {
+
+  if (!nextOptions || nextOptions.length === 0) return;
+
+  nextOptions.forEach((choice, i) => {
+
     const btn = document.createElement('button');
+
     btn.className = 'choice-btn';
     btn.textContent = choice;
     btn.style.animationDelay = (i * 0.05) + 's';
+
     btn.addEventListener('click', () => {
+
       if (isTyping) return;
+
       choicesWrap.innerHTML = '';
+
       addMessage(choice, 'user');
+
       setTimeout(() => respond(choice), 300);
+
     });
+
     choicesWrap.appendChild(btn);
+
   });
 }
 
 // =====================================================
-// 表情変更
-// =====================================================
-const EMOTION_MAP = {
-  neutral:     'front-neutral.png',
-  smile:       'front-smile.png',
-  happy1:      'front-happy1.png',
-  happy2:      'front-happy2.png',
-  surprised:   'front-surprised.png',
-  sleepy:      'front-sleepy.png',
-  sleep:       'front-sleep.png',
-  angry1:      'front-angry1.png',
-  angry2:      'front-angry2.png',
-  cry1:        'front-cry1.png',
-  cry2:        'front-cry2.png',
-};
-
-function setEmotion(key) {
-  const src    = EMOTION_MAP[key] || EMOTION_MAP.neutral;
-  const petEl  = document.getElementById('pet-char');
-  const avatar = document.getElementById('chat-header-avatar');
-  if (petEl) {
-    petEl.src = src;
-    petEl.classList.remove('emotion-bounce');
-    void petEl.offsetWidth;
-    petEl.classList.add('emotion-bounce');
-    petEl.addEventListener('animationend', () => petEl.classList.remove('emotion-bounce'), { once: true });
-  }
-  if (avatar) avatar.src = src;
-}
-
-// =====================================================
-// 応答処理（1つにまとめた版）
+// 応答処理（ランダム回答対応）
 // =====================================================
 function respond(key) {
   if (isTyping) return;
 
-  // ノードを取得（なければ_unknownフォールバック）
   let node = chatData ? chatData[key] : null;
   if (!node) {
     node = (chatData && chatData['_unknown']) || {
@@ -499,20 +565,45 @@ function respond(key) {
     };
   }
 
+  // replyが配列の場合はランダムで1つ選ぶ
+  let replyText, emotionKey, nextOptions;
+  if (Array.isArray(node.reply)) {
+
+  const idx = Math.floor(Math.random() * node.reply.length);
+
+  replyText = node.reply[idx];
+
+  emotionKey = Array.isArray(node.emotion)
+    ? node.emotion[idx]
+    : node.emotion;
+
+  nextOptions = Array.isArray(node.next?.[0])
+    ? node.next[idx]
+    : node.next;
+
+} else {
+
+  replyText = node.reply;
+
+  emotionKey = node.emotion;
+
+  nextOptions = node.next;
+}
+
   isTyping = true;
   chatSend.disabled = true;
   choicesWrap.innerHTML = '';
 
-  const delay = Math.min(600 + node.reply.length * 18, 2200);
+  const delay = Math.min(600 + replyText.length * 18, 2200);
   showTyping();
 
   setTimeout(() => {
     hideTyping();
-    if (node.emotion) setEmotion(node.emotion);
-    const imgSrc = EMOTION_MAP[node.emotion] || EMOTION_MAP.neutral;
-    addMessage(node.reply, 'char', imgSrc);
+    if (emotionKey) setEmotion(emotionKey);
+    const frames = EMOTION_MAP[emotionKey] || EMOTION_MAP.neutral;
+    addMessage(replyText, 'char', frames[0]);
     setTimeout(() => {
-      showChoices(node.next);
+      showChoices(nextOptions);
       isTyping = false;
       chatSend.disabled = false;
     }, 200);
@@ -520,16 +611,12 @@ function respond(key) {
 }
 
 // =====================================================
-// フリー入力処理
+// フリー入力
 // =====================================================
 function matchKeyword(text) {
   if (!chatData) return null;
   const lower = text.toLowerCase();
-
-  // 完全一致（キーが存在するか）
   if (chatData[text]) return text;
-
-  // _keywordsでマッチング
   const kws = chatData['_keywords'];
   if (kws) {
     for (const [kw, target] of Object.entries(kws)) {
@@ -545,7 +632,6 @@ function onSendInput() {
   chatInput.value = '';
   choicesWrap.innerHTML = '';
   addMessage(text, 'user');
-
   const matched = matchKeyword(text);
   setTimeout(() => respond(matched || '_unknown'), 300);
 }
