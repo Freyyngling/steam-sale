@@ -110,7 +110,7 @@
   },
   
   "容量の大きいゲーム知りたい": {
-    "reply": "ゲーム	容量目安<br>DCS World	５００GB〜１TB超<br>Microsoft Flight Simulator ２０２０	３００〜８００GB。<br>ARK: Survival Evolved	４００〜５００GB。<br>ARK: Survival Ascended	２５０〜４００GB。<br>Call of Duty: Black Ops ６	２００〜３１０GB前後。<br>Call of Duty: Modern Warfare	２００〜３００GB。<br>Call of Duty: Warzone	１８０〜２５０GB。<br>Train Simulator Classic	２００〜４００GB。<br>Destiny ２	１５０〜２２０GB。<br>Final Fantasy XV Windows Edition	約１７０GB。<br>Red Dead Redemption ２	約１５０GB。<br>Starfield	１４０〜１６０GB。<br>Baldur's Gate ３	１５０GB前後。<br>Cyberpunk ２０７７	１４０〜１５０GB。",
+    "reply": "ゲーム_容量目安<br>DCS Worl500GB〜1TB超<br>Microsoft_Flight_Simulator2020_300〜800GB。<br>ARK_Survival_Evolved400〜500GB。<br>ARK_Survival_Ascended250〜400GB。<br>Call_of_Duty_Black_Ops6_200〜310GB前後。<br>Call_of_Duty_Modern_Warfare200〜300GB。<br>Call_of_Duty_Warzone180〜250GB。<br>Train_Simulator_Classic200〜400GB。<br>Destiny2_150〜220GB。<br>Final_Fantasy_XV_Windows_Edition約170GB。<br>Red_Dead_Redemption2_約150GB。<br>Starfield140〜160GB。<br>Baldur's_Gate3_150GB前後。<br>Cyberpunk2077_140〜150GB。",
     "emotion": "happy1",
     "next": ["予算内でお得なゲームを探したい", "日本語対応で高評価を探したい", "友達と一緒に遊べるゲームを探したい", "特定のジャンルで探したい"]
   },
