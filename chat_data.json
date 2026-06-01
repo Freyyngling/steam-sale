@@ -106,6 +106,12 @@
   "ゲームの買う時の注意？ポイント": {
     "reply": "意外と見てないか、気にしてない人、多いかも知れないけどゲームの容量。<br>これも注目度ポイントだよ。<br>最近のゲームって100GBとか普通に超えてくるゲーム沢山あるからね。<br>買ったは良いけど容量、圧迫しすぎていて他のゲーム、なんにも入らないんでは……その時点で買う気が少し失せちゃうよね。<br>150GBとかも出てきてるし。この容量にも注意、注目して買う時は見た方がいいよ。",
     "emotion": "happy1",
+    "next": ["予算内でお得なゲームを探したい", "日本語対応で高評価を探したい", "友達と一緒に遊べるゲームを探したい", "特定のジャンルで探したい", "容量の大きいゲーム知りたい"]
+  },
+  
+  "容量の大きいゲーム知りたい": {
+    "reply": "ゲーム	容量目安<br>DCS World	500GB〜1TB超<br>Microsoft Flight Simulator 2020	300〜800GB<br>ARK: Survival Evolved	400〜500GB<br>ARK: Survival Ascended	250〜400GB<br>Call of Duty: Black Ops 6	200〜310GB前後<br>Call of Duty: Modern Warfare	200〜300GB<br>Call of Duty: Warzone	180〜250GB<br>Train Simulator Classic	200〜400GB<br>Destiny 2	150〜220GB<br>Final Fantasy XV Windows Edition	約170GB<br>Red Dead Redemption 2	約150GB<br>Starfield	140〜160GB<br>Baldur's Gate 3	150GB前後<br>Cyberpunk 2077	140〜150GB<br>Forza Horizon 5	150GB前後<br>Forza Motorsport	130〜150GB<br>Medal of Honor: Above and Beyond	約180GB<br>Quantum Break	約180GB<br>The Elder Scrolls Online	150GB前後<br>Monster Hunter Wilds	140GB級",
+    "emotion": "happy1",
     "next": ["予算内でお得なゲームを探したい", "日本語対応で高評価を探したい", "友達と一緒に遊べるゲームを探したい", "特定のジャンルで探したい"]
   },
 
