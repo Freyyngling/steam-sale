@@ -110,9 +110,15 @@
   },
   
   "容量の大きいゲーム知りたい": {
-    "reply": "ゲーム_容量目安<br>DCS_Worl_500GB〜1TB超<br>Microsoft_Flight_Simulator2020_300〜800GB。<br>ARK_Survival_Evolved_400〜500GB。<br>ARK_Survival_Ascended250〜400GB。<br>Call_of_Duty_Black_Ops6_200〜310GB前後。<br>Call_of_Duty_Modern_Warfare_200〜300GB。<br>Call_of_Duty_Warzone_180〜250GB。<br>Train_Simulator_Classic_200〜400GB。<br>Destiny2_150〜220GB。<br>Final_Fantasy_XV_Windows_Edition_約170GB。<br>Red_Dead_Redemption2_約150GB。<br>Starfield_140〜160GB。<br>Baldur's_Gate3_150GB前後。<br>Cyberpunk2077_140〜150GB。<br>Forza_Motorsport_130〜150GB。<br>Medal_of_Honor_Above_and_Beyond_約180GB。<br>Quantum_Break_約180GB。<br>The_Elder_Scrolls_Online_150GB前後。<br>Monster_Hunter_Wilds_140GB級。<br>最近のゲーム容量ヤバくない!<br>こんだけ容量くうと買う気なくならない？……",
+    "reply": "ゲーム_容量目安<br>DCS_Worl_500GB〜1TB超<br>Microsoft_Flight_Simulator2020_300〜800GB。<br>ARK_Survival_Evolved_400〜500GB。<br>ARK_Survival_Ascended250〜400GB。<br>Call_of_Duty_Black_Ops6_200〜310GB前後。<br>Call_of_Duty_Modern_Warfare_200〜300GB。<br>Call_of_Duty_Warzone_180〜250GB。<br>Train_Simulator_Classic_200〜400GB。<br>Destiny2_150〜220GB。<br>Final_Fantasy_XV_Windows_Edition_約170GB。<br>Red_Dead_Redemption2_約150GB。<br>Starfield_140〜160GB。<br>Baldur's_Gate3_150GB前後。<br>Cyberpunk2077_140〜150GB。<br>Forza_Motorsport_130〜150GB。<br>Medal_of_Honor_Above_and_Beyond_約180GB。<br>Quantum_Break_約180GB。<br>The_Elder_Scrolls_Online_150GB前後。<br>Monster_Hunter_Wilds_140GB級。<br>鉄拳8_100GB<br>最近のゲーム容量ヤバくない!?<br>こんだけ容量くうと買う気なくならない？……<br>ダウンロードしないで遊べるストリーミング形式で遊べるならね〜、ともかく……",
     "emotion": "happy1",
-    "next": ["予算内でお得なゲームを探したい", "日本語対応で高評価を探したい", "友達と一緒に遊べるゲームを探したい", "特定のジャンルで探したい"]
+    "next": ["予算内でお得なゲームを探したい", "日本語対応で高評価を探したい", "友達と一緒に遊べるゲームを探したい", "特定のジャンルで探したい", "ストリーミング形式ってなに？"]
+  },
+  
+  "ストリーミング形式ってなに？": {
+    "reply": "ストリーミング形式っていうのはダウンロードしなくても遊べるサービスの事だよ。pcゲームの方だと、steamでは無理だけど、GeForce_NOW_NVIDIAとかのサービスが有名だよ。月額課金サービスだよ。その他、Xbox_Cloud_Gamingとかも有名だよ。こっちも月額課金だね。私的にはXbox_Cloud_Gameingのがオススメかな〜。",
+    "emotion": "happy2",
+    "next": ["日本語対応で高評価を探したい", "データの更新頻度", "セールの豆知識", "わかった！"]
   },
 
   "予算内でお得なゲームを探したい": {
@@ -183,7 +189,10 @@
 
   "今日はどうだった？": {
     "reply": "わたし？、私は、ずっとここでセール見てたよ……。セールって本当に終わりがないよね。あなたは今日どうだった？",
+    "reply": "わたし？、ゲームのやり過ぎで寝不足かも……。<br>ゲームのやり過ぎには注意してね。<br>日常に支障きたしたら終わりだよ(^_^;)",
     "emotion": "sleepy",
+    "emotion": "sleepy",
+    "next": ["良かったよ", "疲れた", "普通かな", "セールでいい買い物できた！", "最近面白いゲームある？", "雑談したい"]
     "next": ["良かったよ", "疲れた", "普通かな", "セールでいい買い物できた！", "最近面白いゲームある？", "雑談したい"]
   },
 
