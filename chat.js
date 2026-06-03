@@ -566,7 +566,7 @@ function respond(key) {
   }
 
   // replyが配列の場合はランダムで1つ選ぶ
-  let replyText, emotionKey, nextOptions, voiceFile;
+  let replyText, emotionKey, nextOptions, voiceFile, bgmFile;
   if (Array.isArray(node.reply)) {
 
   const idx = Math.floor(Math.random() * node.reply.length);
@@ -581,6 +581,10 @@ voiceFile = Array.isArray(node.voice)
   ? node.voice[idx]
   : node.voice;
 
+bgmFile = Array.isArray(node.bgm)
+  ? node.bgm[idx]
+  : node.bgm;
+
 nextOptions = Array.isArray(node.next?.[0])
   ? node.next[idx]
   : node.next;
@@ -590,6 +594,7 @@ nextOptions = Array.isArray(node.next?.[0])
   replyText = node.reply;
   emotionKey = node.emotion;
   voiceFile = node.voice;
+  bgmFile = node.bgm;
   nextOptions = node.next;
 
 }
@@ -609,8 +614,8 @@ nextOptions = Array.isArray(node.next?.[0])
   playVoice(voiceFile);
     }
 
-    if (node.bgm) {
-  playBGM(node.bgm);
+    if (bgmFile) {
+  playBGM(bgmFile);
     }
 
     const frames = EMOTION_MAP[emotionKey] || EMOTION_MAP.neutral;
