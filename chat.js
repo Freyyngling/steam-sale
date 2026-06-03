@@ -566,28 +566,32 @@ function respond(key) {
   }
 
   // replyが配列の場合はランダムで1つ選ぶ
-  let replyText, emotionKey, nextOptions;
+  let replyText, emotionKey, nextOptions, voiceFile;
   if (Array.isArray(node.reply)) {
 
   const idx = Math.floor(Math.random() * node.reply.length);
 
-  replyText = node.reply[idx];
+replyText = node.reply[idx];
 
-  emotionKey = Array.isArray(node.emotion)
-    ? node.emotion[idx]
-    : node.emotion;
+emotionKey = Array.isArray(node.emotion)
+  ? node.emotion[idx]
+  : node.emotion;
 
-  nextOptions = Array.isArray(node.next?.[0])
-    ? node.next[idx]
-    : node.next;
+voiceFile = Array.isArray(node.voice)
+  ? node.voice[idx]
+  : node.voice;
+
+nextOptions = Array.isArray(node.next?.[0])
+  ? node.next[idx]
+  : node.next;
 
 } else {
 
   replyText = node.reply;
-
   emotionKey = node.emotion;
-
+  voiceFile = node.voice;
   nextOptions = node.next;
+
 }
 
   isTyping = true;
@@ -600,6 +604,15 @@ function respond(key) {
   setTimeout(() => {
     hideTyping();
     if (emotionKey) setEmotion(emotionKey);
+
+    if (voiceFile) {
+  playVoice(voiceFile);
+    }
+
+    if (node.bgm) {
+  playBGM(node.bgm);
+    }
+
     const frames = EMOTION_MAP[emotionKey] || EMOTION_MAP.neutral;
     addMessage(replyText, 'char', frames[0]);
     setTimeout(() => {
@@ -610,9 +623,46 @@ function respond(key) {
   }, delay);
 }
 
-// =====================================================
-// フリー入力
-// =====================================================
+  // =====================================================
+  // Voice再生
+  // =====================================================
+
+let voicePlayer = new Audio();
+function playVoice(file) {
+
+  voicePlayer.pause();
+  voicePlayer.currentTime = 0;
+
+  voicePlayer.src = "voice/" + file;
+
+  voicePlayer.volume = 0.8;
+
+  voicePlayer.play().catch(() => {});
+}
+  // =====================================================
+  // BGM再生
+  // =====================================================
+
+let bgmPlayer = new Audio();
+
+bgmPlayer.loop = true;
+
+bgmPlayer.volume = 0.3;
+
+function playBGM(file) {
+
+  bgmPlayer.pause();
+
+  bgmPlayer.currentTime = 0;
+
+  bgmPlayer.src = "bgm/" + file;
+
+  bgmPlayer.play().catch(() => {});
+}
+  
+  // =====================================================
+  // フリー入力
+  // =====================================================
 function matchKeyword(text) {
   if (!chatData) return null;
   const lower = text.toLowerCase();
