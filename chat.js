@@ -688,18 +688,22 @@ function playEffect(effect) {
 
   if (!petEl) return;
 
-  switch(effect) {
+  petEl.classList.remove(
+    "shake",
+    "jump",
+    "spin",
+    "bounce",
+    "flash",
+    "heartbeat",
+    "tremble",
+    "float"
+  );
 
-    case "shake":
+  petEl.classList.add(effect);
 
-      petEl.classList.add("shake");
-
-      setTimeout(() => {
-        petEl.classList.remove("shake");
-      }, 500);
-
-      break;
-  }
+  setTimeout(() => {
+    petEl.classList.remove(effect);
+  }, 1000);
 }
   
   // =====================================================
