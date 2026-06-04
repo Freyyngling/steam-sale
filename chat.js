@@ -314,6 +314,8 @@ function buildChatUI() {
   chatInput    = document.getElementById('chat-input');
   chatSend     = document.getElementById('chat-send');
   choicesWrap  = document.getElementById('chat-choices');
+  
+  character = document.getElementById('pet-char');
 
   document.getElementById('chat-close-btn').addEventListener('click', closeChat);
   document.getElementById('chat-clear-btn').addEventListener('click', clearHistory);
@@ -566,7 +568,7 @@ function respond(key) {
   }
 
   // replyが配列の場合はランダムで1つ選ぶ
-  let replyText, emotionKey, nextOptions, voiceFile, bgmFile;
+  let replyText, emotionKey, nextOptions, voiceFile, bgmFile, effectName;
   if (Array.isArray(node.reply)) {
 
   const idx = Math.floor(Math.random() * node.reply.length);
@@ -585,6 +587,10 @@ bgmFile = Array.isArray(node.bgm)
   ? node.bgm[idx]
   : node.bgm;
 
+effectName = Array.isArray(node.effect)
+  ? node.effect[idx]
+  : node.effect;
+
 nextOptions = Array.isArray(node.next?.[0])
   ? node.next[idx]
   : node.next;
@@ -595,6 +601,7 @@ nextOptions = Array.isArray(node.next?.[0])
   emotionKey = node.emotion;
   voiceFile = node.voice;
   bgmFile = node.bgm;
+  effectName = node.effect;
   nextOptions = node.next;
 
 }
@@ -617,9 +624,15 @@ nextOptions = Array.isArray(node.next?.[0])
     if (bgmFile) {
   playBGM(bgmFile);
     }
-
+    
     const frames = EMOTION_MAP[emotionKey] || EMOTION_MAP.neutral;
     addMessage(replyText, 'char', frames[0]);
+    
+    if (effectName) {
+  playEffect(effectName);
+    }
+
+    
     setTimeout(() => {
       showChoices(nextOptions);
       isTyping = false;
@@ -663,6 +676,30 @@ function playBGM(file) {
   bgmPlayer.src = "bgm/" + file;
 
   bgmPlayer.play().catch(() => {});
+}
+  
+// =====================================================
+// エフェクト
+// =====================================================
+
+function playEffect(effect) {
+
+  const petEl = document.getElementById('pet-char');
+
+  if (!petEl) return;
+
+  switch(effect) {
+
+    case "shake":
+
+      petEl.classList.add("shake");
+
+      setTimeout(() => {
+        petEl.classList.remove("shake");
+      }, 500);
+
+      break;
+  }
 }
   
   // =====================================================
