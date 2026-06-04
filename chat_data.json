@@ -6,7 +6,7 @@
     "emotion": "smile",
     "voice": "yaa.mp3",
     "bgm": "hajimari.mp3",
-    "effect": "shake"
+    "effect": "shake",
     "next": ["使い方を教えて", "セールの豆知識", "絞り込みのコツ", "雑談したい", "バック背景について", "右上のゲームと調べるのアイコン"]
   },
 
