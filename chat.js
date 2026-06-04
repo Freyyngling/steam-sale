@@ -15,6 +15,7 @@ let chatMessages = null;
 let chatInput    = null;
 let chatSend     = null;
 let choicesWrap  = null;
+let character    = null;
 
 // アバターアニメーション用
 let avatarAnimTimer = null;
@@ -314,8 +315,6 @@ function buildChatUI() {
   chatInput    = document.getElementById('chat-input');
   chatSend     = document.getElementById('chat-send');
   choicesWrap  = document.getElementById('chat-choices');
-  
-  character = document.getElementById('pet-char');
 
   document.getElementById('chat-close-btn').addEventListener('click', closeChat);
   document.getElementById('chat-clear-btn').addEventListener('click', clearHistory);
