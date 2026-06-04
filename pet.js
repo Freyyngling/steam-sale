@@ -247,8 +247,8 @@ function buildDropZones() {
       const r = priceRow.getBoundingClientRect();
       // 右端から十分離す（idx=0が一番右、idx=1がその左）
       // 画面右端から: 20px + idx * 72px
-      const rightPx = 50 + idx * 150;
-      wrap.style.top   = (r.top + (r.height - 56) / 2 + 20) + 'px';
+      const rightPx = 80 + idx * 130;
+      wrap.style.top   = (r.top + (r.height - 56) / 2 + 50) + 'px';
       wrap.style.right = rightPx + 'px';
     }
 
