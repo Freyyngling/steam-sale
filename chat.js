@@ -293,6 +293,11 @@ function buildChatUI() {
           <div id="chat-header-name">セール観測員</div>
           <div id="chat-header-status">オンライン</div>
         </div>
+
+        <button class="chat-header-btn" id="bgm-toggle-btn" title="BGM ON/OFF">🔊</button>
+        <button class="chat-header-btn" id="bgm-vol-down-btn" title="音量を下げる">🔈</button>
+        <button class="chat-header-btn" id="bgm-vol-up-btn" title="音量を上げる">🔉</button>
+
         <button class="chat-header-btn" id="chat-clear-btn" title="履歴をクリア">🗑</button>
         <button class="chat-header-btn" id="chat-close-btn" title="閉じる">✕</button>
       </div>
@@ -318,6 +323,9 @@ function buildChatUI() {
 
   document.getElementById('chat-close-btn').addEventListener('click', closeChat);
   document.getElementById('chat-clear-btn').addEventListener('click', clearHistory);
+  document.getElementById('bgm-toggle-btn').addEventListener('click', toggleBGM);
+  document.getElementById('bgm-vol-down-btn').addEventListener('click', volumeDown);
+  document.getElementById('bgm-vol-up-btn').addEventListener('click', volumeUp);
   chatSend.addEventListener('click', onSendInput);
   chatInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') onSendInput();
@@ -760,6 +768,41 @@ function addImage(file) {
 
   chatMessages.scrollTop = chatMessages.scrollHeight;
   }
+
+// =====================================================
+// ボリューム関係
+// =====================================================
+  
+  function toggleBGM() {
+
+  const btn = document.getElementById('bgm-toggle-btn');
+
+  if (bgmPlayer.paused) {
+
+    bgmPlayer.play().catch(() => {});
+    btn.textContent = "🔊";
+
+  } else {
+
+    bgmPlayer.pause();
+    btn.textContent = "🔇";
+
+  }
+}
+
+function volumeDown() {
+
+  bgmPlayer.volume =
+    Math.max(0, bgmPlayer.volume - 0.1);
+
+}
+
+function volumeUp() {
+
+  bgmPlayer.volume =
+    Math.min(1, bgmPlayer.volume + 0.1);
+
+}
   
   // =====================================================
   // フリー入力
