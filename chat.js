@@ -290,16 +290,22 @@ function buildChatUI() {
       <div id="chat-header">
         <img id="chat-header-avatar" src="front-smile.png" alt="avatar">
         <div id="chat-header-info">
-          <div id="chat-header-name">セール観測員</div>
-          <div id="chat-header-status">オンライン</div>
-        </div>
+    <div id="chat-header-name">セール観測員</div>
 
-        <button class="chat-header-btn" id="bgm-toggle-btn" title="BGM ON/OFF">🔊</button>
-        <button class="chat-header-btn" id="bgm-vol-down-btn" title="音量を下げる">🔈</button>
-        <button class="chat-header-btn" id="bgm-vol-up-btn" title="音量を上げる">🔉</button>
+    <div id="chat-header-status">オンライン</div>
 
-        <button class="chat-header-btn" id="chat-clear-btn" title="履歴をクリア">🗑</button>
-        <button class="chat-header-btn" id="chat-close-btn" title="閉じる">✕</button>
+    <div id="chat-audio-controls">
+
+      <button class="chat-header-btn" id="bgm-toggle-btn">🔊</button>
+      <button class="chat-header-btn" id="bgm-vol-down-btn">🔈</button>
+      <button class="chat-header-btn" id="bgm-vol-up-btn">🔉</button>
+
+    </div>
+
+  </div>
+
+  <button class="chat-header-btn" id="chat-clear-btn">🗑</button>
+  <button class="chat-header-btn" id="chat-close-btn">✕</button>
       </div>
       <div id="chat-messages"></div>
       <div id="chat-choices"></div>
