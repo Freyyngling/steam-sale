@@ -567,7 +567,7 @@ function respond(key) {
   }
 
   // replyが配列の場合はランダムで1つ選ぶ
-  let replyText, emotionKey, nextOptions, voiceFile, bgmFile, imageFile, effectName;
+  let replyText, emotionKey, nextOptions, voiceFile, bgmFile, imageFile, videoFile, effectName;
   if (Array.isArray(node.reply)) {
 
   const idx = Math.floor(Math.random() * node.reply.length);
@@ -593,6 +593,10 @@ effectName = Array.isArray(node.effect)
 imageFile = Array.isArray(node.image)
   ? node.image[idx]
   : node.image;
+    
+videoFile = Array.isArray(node.video)
+  ? node.video[idx]
+  : node.video;
 
 nextOptions = Array.isArray(node.next?.[0])
   ? node.next[idx]
@@ -606,6 +610,7 @@ nextOptions = Array.isArray(node.next?.[0])
   bgmFile = node.bgm;
   effectName = node.effect;
   imageFile = node.image;
+  videoFile = node.video;
   nextOptions = node.next;
 
 }
@@ -634,6 +639,10 @@ nextOptions = Array.isArray(node.next?.[0])
 
     if (imageFile) {
   addImage(imageFile);
+    }
+
+    if (videoFile) {
+  addVideo(videoFile);
     }
     
     if (effectName) {
@@ -725,6 +734,26 @@ function addImage(file) {
 
   wrap.innerHTML = `
     <img src="images/${file}" alt="">
+  `;
+
+  chatMessages.appendChild(wrap);
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+// =====================================================
+// ビデオ再生
+// =====================================================
+  
+  function addVideo(file) {
+
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-video';
+
+  wrap.innerHTML = `
+    <video controls>
+      <source src="videos/${file}" type="video/mp4">
+    </video>
   `;
 
   chatMessages.appendChild(wrap);
