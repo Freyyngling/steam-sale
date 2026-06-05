@@ -296,11 +296,16 @@ function buildChatUI() {
 
     <div id="chat-audio-controls">
 
-      <button class="chat-header-btn" id="bgm-toggle-btn">🔊</button>
-      <button class="chat-header-btn" id="bgm-vol-down-btn">🔈</button>
-      <button class="chat-header-btn" id="bgm-vol-up-btn">🔉</button>
+<button class="chat-header-btn" id="bgm-toggle-btn">🔊</button>
 
-    </div>
+  <input
+    type="range"
+    id="bgm-volume-slider"
+    min="0"
+    max="100"
+  >
+
+</div>
 
   </div>
 
@@ -330,8 +335,23 @@ function buildChatUI() {
   document.getElementById('chat-close-btn').addEventListener('click', closeChat);
   document.getElementById('chat-clear-btn').addEventListener('click', clearHistory);
   document.getElementById('bgm-toggle-btn').addEventListener('click', toggleBGM);
-  document.getElementById('bgm-vol-down-btn').addEventListener('click', volumeDown);
-  document.getElementById('bgm-vol-up-btn').addEventListener('click', volumeUp);
+
+const volumeSlider =
+  document.getElementById('bgm-volume-slider');
+
+volumeSlider.value = bgmPlayer.volume * 100;
+
+volumeSlider.addEventListener('input', () => {
+
+  bgmPlayer.volume = volumeSlider.value / 100;
+  
+  localStorage.setItem(
+  "bgmVolume",
+  bgmPlayer.volume
+);
+
+});
+  
   chatSend.addEventListener('click', onSendInput);
   chatInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') onSendInput();
@@ -709,6 +729,16 @@ bgmPlayer.loop = true;
 
 bgmPlayer.volume = 0.3;
 
+  const savedVolume =
+  localStorage.getItem("bgmVolume");
+
+if (savedVolume !== null) {
+
+  bgmPlayer.volume =
+    parseFloat(savedVolume);
+
+}
+
 function playBGM(file) {
 
   bgmPlayer.pause();
@@ -807,20 +837,21 @@ function addImage(file) {
   
   function toggleBGM() {
 
-  const btn = document.getElementById('bgm-toggle-btn');
-
   if (bgmPlayer.paused) {
 
-    bgmPlayer.play().catch(() => {});
-    btn.textContent = "🔊";
+    bgmPlayer.play();
+
+    document.getElementById('bgm-toggle-btn').textContent = '🔊';
 
   } else {
 
     bgmPlayer.pause();
-    btn.textContent = "🔇";
+
+    document.getElementById('bgm-toggle-btn').textContent = '🔇';
 
   }
-}
+
+  }
 
 function volumeDown() {
 
