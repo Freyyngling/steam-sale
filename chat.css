@@ -93,3 +93,15 @@
   50% { transform: translateY(-12px); }
   100% { transform: translateY(0); }
 }
+
+/* チャットイメージ画像 */
+.chat-image {
+  margin: 8px 0;
+}
+
+.chat-image img {
+  max-width: 90%;
+  max-height: 400px;
+  border-radius: 12px;
+  display: block;
+}
