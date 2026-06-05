@@ -105,3 +105,18 @@
   border-radius: 12px;
   display: block;
 }
+
+/* チャットイメージ動画 */
+.chat-video {
+  margin: 12px 0;
+}
+
+.chat-video video {
+  max-width: 90%;
+  max-height: 400px;
+  width: auto;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+  margin: 0 auto;
+}
