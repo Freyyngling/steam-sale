@@ -2,7 +2,7 @@
   "_comment": "会話データファイル。replyは返答、emotionは表情、nextは次の選択肢、keywordsはフリー入力のキーワードマッチ用",
 
   "start": {
-    "reply": "あ、呼んだ？(๑•ω•́ฅ✧*+:•*”:♡.•♬✧どうしたの？何か困ってる？",
+    "reply": "あ、呼んだ？<br>(๑•ω•́ฅ✧*+:•*”:♡.•♬✧<br>どうしたの？何か困ってる？",
     "emotion": "smile",
     "voice": "yaa.mp3",
     "bgm": "hajimari.mp3",
