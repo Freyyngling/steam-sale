@@ -455,18 +455,29 @@ function setupChatDrag() {
   function onEnd() { dragging = false; }
 
   header.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.chat-header-btn')) return;
-    onStart(e.clientX, e.clientY);
-    e.preventDefault();
-  });
+　　　if (e.target.closest('.chat-header-btn') ||
+         e.target.closest('#bgm-volume-slider')
+     ) return;
+
+  onStart(e.clientX, e.clientY);
+
+  e.preventDefault();
+
+});
   document.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
   document.addEventListener('mouseup', onEnd);
 
   header.addEventListener('touchstart', (e) => {
-    if (e.target.closest('.chat-header-btn')) return;
-    const t = e.touches[0];
-    onStart(t.clientX, t.clientY);
-  }, { passive: true });
+     if (e.target.closest('.chat-header-btn') ||
+         e.target.closest('#bgm-volume-slider')
+    ) return;
+
+  const t = e.touches[0];
+
+  onStart(t.clientX, t.clientY);
+
+}, { passive: true });
+  
   document.addEventListener('touchmove', (e) => {
     if (!dragging) return;
     const t = e.touches[0];
