@@ -109,11 +109,12 @@
 /* チャットイメージ動画 */
 .chat-video {
   margin: 12px 0;
+  text-align: center;
 }
 
 .chat-video video {
   max-width: 90%;
-  max-height: 400px;
+  max-height: 600px;
   width: auto;
   height: auto;
   border-radius: 12px;
