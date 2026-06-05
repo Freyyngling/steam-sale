@@ -552,6 +552,8 @@ function showChoices(nextOptions) {
 
       if (isTyping) return;
 
+      playSound("click.mp3");
+
       choicesWrap.innerHTML = '';
 
       addMessage(choice, 'user');
@@ -581,7 +583,7 @@ function respond(key) {
   }
 
   // replyが配列の場合はランダムで1つ選ぶ
-  let replyText, emotionKey, nextOptions, voiceFile, bgmFile, imageFile, videoFile, effectName;
+  let replyText, emotionKey, nextOptions, voiceFile, bgmFile, imageFile, videoFile, soundFile, effectName;
   if (Array.isArray(node.reply)) {
 
   const idx = Math.floor(Math.random() * node.reply.length);
@@ -599,6 +601,10 @@ voiceFile = Array.isArray(node.voice)
 bgmFile = Array.isArray(node.bgm)
   ? node.bgm[idx]
   : node.bgm;
+
+soundFile = Array.isArray(node.sound)
+  ? node.sound[idx]
+  : node.sound;
 
 effectName = Array.isArray(node.effect)
   ? node.effect[idx]
@@ -622,6 +628,7 @@ nextOptions = Array.isArray(node.next?.[0])
   emotionKey = node.emotion;
   voiceFile = node.voice;
   bgmFile = node.bgm;
+  soundFile = node.sound;
   effectName = node.effect;
   imageFile = node.image;
   videoFile = node.video;
@@ -646,6 +653,10 @@ nextOptions = Array.isArray(node.next?.[0])
 
     if (bgmFile) {
   playBGM(bgmFile);
+    }
+
+    if (soundFile) {
+  playSound(soundFile);
     }
     
     const frames = EMOTION_MAP[emotionKey] || EMOTION_MAP.neutral;
@@ -707,6 +718,21 @@ function playBGM(file) {
   bgmPlayer.src = "bgm/" + file;
 
   bgmPlayer.play().catch(() => {});
+}
+
+
+// =====================================================
+// 効果音再生
+// =====================================================
+
+function playSound(file) {
+
+  const sound = new Audio("sound/" + file);
+
+  sound.volume = 0.8;
+
+  sound.play().catch(() => {});
+
 }
   
 // =====================================================
@@ -829,6 +855,7 @@ function matchKeyword(text) {
 function onSendInput() {
   const text = chatInput.value.trim();
   if (!text || isTyping) return;
+  playSound("send.mp3");
   chatInput.value = '';
   choicesWrap.innerHTML = '';
   addMessage(text, 'user');
