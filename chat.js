@@ -567,7 +567,7 @@ function respond(key) {
   }
 
   // replyが配列の場合はランダムで1つ選ぶ
-  let replyText, emotionKey, nextOptions, voiceFile, bgmFile, effectName;
+  let replyText, emotionKey, nextOptions, voiceFile, bgmFile, imageFile, effectName;
   if (Array.isArray(node.reply)) {
 
   const idx = Math.floor(Math.random() * node.reply.length);
@@ -590,6 +590,10 @@ effectName = Array.isArray(node.effect)
   ? node.effect[idx]
   : node.effect;
 
+imageFile = Array.isArray(node.image)
+  ? node.image[idx]
+  : node.image;
+
 nextOptions = Array.isArray(node.next?.[0])
   ? node.next[idx]
   : node.next;
@@ -601,6 +605,7 @@ nextOptions = Array.isArray(node.next?.[0])
   voiceFile = node.voice;
   bgmFile = node.bgm;
   effectName = node.effect;
+  imageFile = node.image;
   nextOptions = node.next;
 
 }
@@ -626,6 +631,10 @@ nextOptions = Array.isArray(node.next?.[0])
     
     const frames = EMOTION_MAP[emotionKey] || EMOTION_MAP.neutral;
     addMessage(replyText, 'char', frames[0]);
+
+    if (imageFile) {
+  addImage(imageFile);
+    }
     
     if (effectName) {
   playEffect(effectName);
@@ -704,6 +713,24 @@ function playEffect(effect) {
     petEl.classList.remove(effect);
   }, 1000);
 }
+
+// =====================================================
+// イメージ画像
+// =====================================================
+
+function addImage(file) {
+
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-image';
+
+  wrap.innerHTML = `
+    <img src="images/${file}" alt="">
+  `;
+
+  chatMessages.appendChild(wrap);
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
   
   // =====================================================
   // フリー入力
