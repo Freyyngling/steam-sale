@@ -341,14 +341,22 @@ const volumeSlider =
 
 volumeSlider.value = bgmPlayer.volume * 100;
 
+volumeSlider.addEventListener('mousedown', (e) => {
+  e.stopPropagation();
+});
+
+volumeSlider.addEventListener('touchstart', (e) => {
+  e.stopPropagation();
+});
+
 volumeSlider.addEventListener('input', () => {
 
   bgmPlayer.volume = volumeSlider.value / 100;
-  
+
   localStorage.setItem(
-  "bgmVolume",
-  bgmPlayer.volume
-);
+    "bgmVolume",
+    bgmPlayer.volume
+  );
 
 });
   
