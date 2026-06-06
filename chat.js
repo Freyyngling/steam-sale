@@ -46,7 +46,7 @@ function injectStyles() {
       position: fixed;
       bottom: 60px;
       left: 20px;
-      width: 410px;
+      width: 390px;
       z-index: 9500;
       display: none;
       flex-direction: column;
@@ -81,8 +81,8 @@ function injectStyles() {
     #chat-header:active { cursor: grabbing; }
 
     #chat-header-avatar {
-      width: 96px;
-      height: 96px;
+      width: 85px;
+      height: 85px;
       object-fit: contain;
       image-rendering: pixelated;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
