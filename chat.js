@@ -778,7 +778,7 @@ if (savedVolume !== null) {
 
 function playBGM(file) {
   
-  currentBGM = file;
+  currentBGM = file.replace(".mp3", "");
 
   bgmPlayer.pause();
 
@@ -792,7 +792,7 @@ function playBGM(file) {
   if (bgmName) {
     bgmName.textContent =
       "Now Playing : " +
-      file.replace(".mp3", "");
+      currentBGM;
   }
 
   bgmPlayer.play().catch(() => {});
@@ -817,6 +817,17 @@ function playCurrentBGM() {
 function pauseBGM() {
 
   bgmPlayer.pause();
+  
+  const bgmName =
+    document.getElementById("bgm-name");
+
+  if (bgmName && currentBGM) {
+
+    bgmName.textContent =
+      "⏸ 一時停止 : " +
+      currentBGM;
+
+  }
 
 }
 
@@ -831,7 +842,7 @@ function stopBGM() {
 
   if (bgmName) {
     bgmName.textContent =
-      "♪ 停止中";
+      "⏹ 停止中";
   }
 
 }
