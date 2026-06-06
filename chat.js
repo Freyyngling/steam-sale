@@ -296,16 +296,24 @@ function buildChatUI() {
 
     <div id="chat-audio-controls">
 
-<button class="chat-header-btn" id="bgm-toggle-btn">🔊</button>
+     <button class="chat-header-btn" id="bgm-toggle-btn">🔊</button>
 
-  <input
-    type="range"
-    id="bgm-volume-slider"
-    min="0"
-    max="100"
-  >
+     <input
+       type="range"
+       id="bgm-volume-slider"
+       min="0"
+       max="100"
+     >
 
-</div>
+    </div>
+
+    <div id="chat-bgm-controls">
+
+      <button class="chat-header-btn" id="bgm-play-btn">▶</button>
+
+      <button class="chat-header-btn" id="bgm-stop-btn">⏹</button>
+
+    </div>
 
   </div>
 
@@ -456,6 +464,7 @@ function setupChatDrag() {
 
   header.addEventListener('mousedown', (e) => {
 　　　if (e.target.closest('.chat-header-btn') ||
+         e.target.closest('#chat-audio-controls') ||
          e.target.closest('#bgm-volume-slider')
      ) return;
 
@@ -469,6 +478,7 @@ function setupChatDrag() {
 
   header.addEventListener('touchstart', (e) => {
      if (e.target.closest('.chat-header-btn') ||
+         e.target.closest('#chat-audio-controls') ||
          e.target.closest('#bgm-volume-slider')
     ) return;
 
