@@ -293,6 +293,8 @@ function buildChatUI() {
     <div id="chat-header-name">セール観測員</div>
 
     <div id="chat-header-status">オンライン</div>
+    
+    <div id="bgm-name">♪ BGMなし</div>
 
     <div id="chat-audio-controls">
 
@@ -781,6 +783,15 @@ function playBGM(file) {
 
   bgmPlayer.src = "bgm/" + file;
 
+  const bgmName =
+    document.getElementById("bgm-name");
+
+  if (bgmName) {
+    bgmName.textContent =
+      "Now Playing : " +
+      file.replace(".mp3", "");
+  }
+
   bgmPlayer.play().catch(() => {});
 }
 
@@ -801,6 +812,14 @@ function stopBGM() {
   bgmPlayer.pause();
 
   bgmPlayer.currentTime = 0;
+  
+  const bgmName =
+    document.getElementById("bgm-name");
+
+  if (bgmName) {
+    bgmName.textContent =
+      "♪ 停止中";
+  }
 
 }
 
