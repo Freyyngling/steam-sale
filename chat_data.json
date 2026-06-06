@@ -127,7 +127,7 @@
   
   "容量の大きいゲーム知りたい": {
     "reply": "ゲーム_容量目安<br>DCS_Worl_500GB〜1TB超<br>Microsoft_Flight_Simulator2020_300〜800GB。<br>ARK_Survival_Evolved_400〜500GB。<br>ARK_Survival_Ascended250〜400GB。<br>Call_of_Duty_Black_Ops6_200〜310GB前後。<br>Call_of_Duty_Modern_Warfare_200〜300GB。<br>Call_of_Duty_Warzone_180〜250GB。<br>Train_Simulator_Classic_200〜400GB。<br>Destiny2_150〜220GB。<br>Final_Fantasy_XV_Windows_Edition_約170GB。<br>Red_Dead_Redemption2_約150GB。<br>Starfield_140〜160GB。<br>Baldur's_Gate3_150GB前後。<br>Cyberpunk2077_140〜150GB。<br>Forza_Motorsport_130〜150GB。<br>Medal_of_Honor_Above_and_Beyond_約180GB。<br>Quantum_Break_約180GB。<br>The_Elder_Scrolls_Online_150GB前後。<br>Monster_Hunter_Wilds_140GB級。<br>鉄拳8_100GB<br>最近のゲーム容量ヤバくない!?<br>こんだけ容量くうと買う気なくならない？……<br>ダウンロードしないで遊べるストリーミング形式で遊べるならね〜、ともかく……",
-    "emotion": "happy1",
+    "emotion": "cry2",
     "next": ["予算内でお得なゲームを探したい", "日本語対応で探したい", "友達と一緒に遊べるゲームを探したい", "特定のジャンルで探したい", "ストリーミング形式ってなに？"]
   },
   
@@ -258,7 +258,7 @@
   
   "残りHP5%": {
     "reply": "それもう瀕死じゃん。<br>よくここまで帰ってこれたね。<br>まず回復アイテム使おうか?。<br>お疲れさま。今日はゆっくり休みなよ。<br>私も、今日は本でも読んでゆっくりする事にするよ。",
-    "emotion": "neutral",
+    "emotion": "cry2",
     "image": "dokusho.jpg",
     "next": ["最近面白いゲームある？", "好きなゲームは？", "ありがとう！", "雑談したい"]
   },
@@ -271,8 +271,8 @@
   },
   
   "セールでいい買い物できた！": {
-    "reply": "やった〜！何買ったの？でも、また、出費で財布がいたむね〜。(ToT)",
-    "emotion": "cry2",
+    "reply": "やった〜！何買ったの？<br>このページ役に立ったかな？(^_-)-☆<br>また、時間が溶けるね〜。",
+    "emotion": "happy1",
     "next": ["最近面白いゲームある？", "好きなゲームは？", "ありがとう！"]
   },
 
