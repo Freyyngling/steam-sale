@@ -137,8 +137,8 @@ function injectStyles() {
     .chat-msg.user { flex-direction: row-reverse; }
 
     .chat-msg-avatar {
-      width: 72px;
-      height: 72px;
+      width: 62px;
+      height: 62px;
       object-fit: contain;
       image-rendering: pixelated;
       flex-shrink: 0;
