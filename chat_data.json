@@ -127,7 +127,7 @@
   
   "容量の大きいゲーム知りたい": {
     "reply": "ゲーム_容量目安<br>DCS_Worl_500GB〜1TB超<br>Microsoft_Flight_Simulator2020_300〜800GB。<br>ARK_Survival_Evolved_400〜500GB。<br>ARK_Survival_Ascended250〜400GB。<br>Call_of_Duty_Black_Ops6_200〜310GB前後。<br>Call_of_Duty_Modern_Warfare_200〜300GB。<br>Call_of_Duty_Warzone_180〜250GB。<br>Train_Simulator_Classic_200〜400GB。<br>Destiny2_150〜220GB。<br>Final_Fantasy_XV_Windows_Edition_約170GB。<br>Red_Dead_Redemption2_約150GB。<br>Starfield_140〜160GB。<br>Baldur's_Gate3_150GB前後。<br>Cyberpunk2077_140〜150GB。<br>Forza_Motorsport_130〜150GB。<br>Medal_of_Honor_Above_and_Beyond_約180GB。<br>Quantum_Break_約180GB。<br>The_Elder_Scrolls_Online_150GB前後。<br>Monster_Hunter_Wilds_140GB級。<br>鉄拳8_100GB<br>最近のゲーム容量ヤバくない!?<br>こんだけ容量くうと買う気なくならない？……<br>ダウンロードしないで遊べるストリーミング形式で遊べるならね〜、ともかく……",
-    "emotion": "cry2",
+    "emotion": "angry1",
     "next": ["予算内でお得なゲームを探したい", "日本語対応で探したい", "友達と一緒に遊べるゲームを探したい", "特定のジャンルで探したい", "ストリーミング形式ってなに？"]
   },
   
@@ -193,7 +193,7 @@
 
   "セール終了後に値上がりする？": {
     "reply": "当然、セールが終わると元の値段に戻るよ。「あとで買えばいいや」って思ってると後悔することも……欲しいと思ったら早めに買うのがおすすめだよ！",
-    "emotion": "angry1",
+    "emotion": "cry1",
     "next": ["セール中の価格は信用できる？", "大型セールはいつ？", "わかった！"]
   },
 
@@ -313,8 +313,8 @@
   },
   
   "ゴッドイーター3の凄いシステム": {
-    "reply": "ゴッドイーター3のオンライン協力プレイシステムって他のオンライン協力プレイシステムと違って、その時に人がいなくても、それまでプレイした人のデータが上がってて、育てられたキャラクターが協力討伐のとき、補填されるシステムなので、人がいないって嘆く事が無いよ。このシステムすごくない?!。ゴッドイーター3もセール時は安くなるので買うならその時だよ。",
-    "emotion": "happy2",
+    "reply": "ゴッドイーター3のオンライン協力プレイシステムって他のオンライン協力プレイシステムと違って、その時に人がいなくても、それまでプレイした人のデータが上がってて、（自分の分身）キャラクターが協力討伐のとき、補填されるシステムなので、人がいないって嘆く事が無いよ。このシステムすごくない?!。ゴッドイーター3もセール時は安くなるので買うならその時だよ。",
+    "emotion": "surprised",
     "next": ["おすすめの絞り込み方は？", "セールの豆知識", "ゴッドイーター3", "ありがとう！", "雑談したい"]
   },
   
