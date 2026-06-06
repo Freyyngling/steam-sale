@@ -311,6 +311,8 @@ function buildChatUI() {
 
       <button class="chat-header-btn" id="bgm-play-btn">▶</button>
 
+      <button class="chat-header-btn" id="bgm-pause-btn">⏸</button>
+
       <button class="chat-header-btn" id="bgm-stop-btn">⏹</button>
 
     </div>
@@ -343,6 +345,9 @@ function buildChatUI() {
   document.getElementById('chat-close-btn').addEventListener('click', closeChat);
   document.getElementById('chat-clear-btn').addEventListener('click', clearHistory);
   document.getElementById('bgm-toggle-btn').addEventListener('click', toggleBGM);
+  document.getElementById('bgm-play-btn').addEventListener('click', playCurrentBGM);
+  document.getElementById('bgm-pause-btn').addEventListener('click', pauseBGM);
+  document.getElementById('bgm-stop-btn').addEventListener('click', stopBGM);
 
 const volumeSlider =
   document.getElementById('bgm-volume-slider');
@@ -777,6 +782,26 @@ function playBGM(file) {
   bgmPlayer.src = "bgm/" + file;
 
   bgmPlayer.play().catch(() => {});
+}
+
+function playCurrentBGM() {
+
+  bgmPlayer.play().catch(() => {});
+
+}
+
+function pauseBGM() {
+
+  bgmPlayer.pause();
+
+}
+
+function stopBGM() {
+
+  bgmPlayer.pause();
+
+  bgmPlayer.currentTime = 0;
+
 }
 
 
