@@ -81,8 +81,8 @@ function injectStyles() {
     #chat-header:active { cursor: grabbing; }
 
     #chat-header-avatar {
-      width: 85px;
-      height: 85px;
+      width: 72px;
+      height: 72px;
       object-fit: contain;
       image-rendering: pixelated;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
