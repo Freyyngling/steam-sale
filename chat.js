@@ -112,7 +112,7 @@ function injectStyles() {
     #chat-close-btn:hover { color: #f87171; border-color: #f87171; }
 
     #chat-messages {
-      height: 340px;
+      height: 380px;
       overflow-y: auto;
       padding: 14px 14px 6px;
       display: flex;
