@@ -143,3 +143,19 @@
   gap: 6px;
 
 }
+
+#bgm-name {
+
+  font-size: 11px;
+
+  color: #94a3b8;
+
+  margin-top: 2px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
