@@ -309,7 +309,7 @@ function buildChatUI() {
 
     <div id="chat-bgm-controls">
 
-      <button class="chat-header-btn" id="bgm-play-btn">▶</button>
+      <button class="chat-header-btn" id="bgm-play-btn">▶️</button>
 
       <button class="chat-header-btn" id="bgm-pause-btn">⏸</button>
 
