@@ -759,6 +759,7 @@ function playVoice(file) {
   // BGM再生
   // =====================================================
 
+let currentBGM = "";
 let bgmPlayer = new Audio();
 
 bgmPlayer.loop = true;
@@ -776,6 +777,8 @@ if (savedVolume !== null) {
 }
 
 function playBGM(file) {
+  
+  currentBGM = file;
 
   bgmPlayer.pause();
 
@@ -798,6 +801,16 @@ function playBGM(file) {
 function playCurrentBGM() {
 
   bgmPlayer.play().catch(() => {});
+  
+  const bgmName =
+    document.getElementById("bgm-name");
+
+  if (bgmName && currentBGM) {
+
+    bgmName.textContent =
+      "Now Playing : " + currentBGM;
+
+  }
 
 }
 
