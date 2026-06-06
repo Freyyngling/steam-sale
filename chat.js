@@ -81,8 +81,8 @@ function injectStyles() {
     #chat-header:active { cursor: grabbing; }
 
     #chat-header-avatar {
-      width: 72px;
-      height: 72px;
+      width: 96px;
+      height: 96px;
       object-fit: contain;
       image-rendering: pixelated;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
@@ -137,8 +137,8 @@ function injectStyles() {
     .chat-msg.user { flex-direction: row-reverse; }
 
     .chat-msg-avatar {
-      width: 64px;
-      height: 64px;
+      width: 72px;
+      height: 72px;
       object-fit: contain;
       image-rendering: pixelated;
       flex-shrink: 0;
