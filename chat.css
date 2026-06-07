@@ -159,3 +159,13 @@
   text-overflow: ellipsis;
 
 }
+
+#affection-display {
+  font-size: 11px;
+  color: #fbbf24;
+}
+
+#affection-rank {
+  font-size: 11px;
+  color: #38bdf8;
+}
