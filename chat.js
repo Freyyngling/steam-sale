@@ -293,6 +293,10 @@ function buildChatUI() {
     <div id="chat-header-name">セール観測員</div>
 
     <div id="chat-header-status">オンライン</div>
+
+    <div id="affection-display">親密度：0</div>
+
+    <div id="affection-rank">ランク：初対面</div>
     
     <div id="bgm-name">♪ BGMなし</div>
 
@@ -316,6 +320,8 @@ function buildChatUI() {
       <button class="chat-header-btn" id="bgm-pause-btn">⏸</button>
 
       <button class="chat-header-btn" id="bgm-stop-btn">⏹</button>
+
+      <button class="chat-header-btn" id="reset-affection-btn">💔</button>
 
     </div>
 
@@ -350,6 +356,7 @@ function buildChatUI() {
   document.getElementById('bgm-play-btn').addEventListener('click', playCurrentBGM);
   document.getElementById('bgm-pause-btn').addEventListener('click', pauseBGM);
   document.getElementById('bgm-stop-btn').addEventListener('click', stopBGM);
+  document.getElementById('reset-affection-btn').addEventListener('click', resetAffection);
 
 const volumeSlider =
   document.getElementById('bgm-volume-slider');
@@ -381,6 +388,8 @@ volumeSlider.addEventListener('input', () => {
   });
 
   setupChatDrag();
+
+  updateAffectionDisplay();
 }
 
 // =====================================================
@@ -627,6 +636,20 @@ function showChoices(nextOptions) {
 // 応答処理（ランダム回答対応）
 // =====================================================
 function respond(key) {
+
+  if (key !== "start") {
+
+    affection++;
+
+    localStorage.setItem(
+      "affection",
+      affection
+    );
+
+    updateAffectionDisplay();
+
+  }
+  
   if (isTyping) return;
 
   let node = chatData ? chatData[key] : null;
@@ -755,6 +778,83 @@ function playVoice(file) {
 
   voicePlayer.play().catch(() => {});
 }
+
+// =====================================================
+// 親密度
+// =====================================================
+
+let affection = 0;
+
+const savedAffection =
+  localStorage.getItem(
+    "affection"
+  );
+
+if (savedAffection !== null) {
+
+  affection =
+    parseInt(savedAffection, 10);
+
+}
+
+  function getAffectionRank() {
+
+  if (affection >= 100)
+    return "親友";
+
+  if (affection >= 50)
+    return "仲良し";
+
+  if (affection >= 20)
+    return "友達";
+
+  return "初対面";
+
+  }
+
+  function updateAffectionDisplay() {
+
+  const affectionEl =
+    document.getElementById(
+      "affection-display"
+    );
+
+  const rankEl =
+    document.getElementById(
+      "affection-rank"
+    );
+
+  if (affectionEl) {
+
+    affectionEl.textContent =
+      "親密度：" + affection;
+
+  }
+
+  if (rankEl) {
+
+    rankEl.textContent =
+      "ランク：" +
+      getAffectionRank();
+
+  }
+
+  }
+
+function resetAffection() {
+
+  affection = 0;
+
+  localStorage.setItem(
+    "affection",
+    affection
+  );
+
+  updateAffectionDisplay();
+
+}
+
+  
   // =====================================================
   // BGM再生
   // =====================================================
