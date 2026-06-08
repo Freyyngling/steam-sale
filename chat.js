@@ -493,8 +493,8 @@ function setupChatDrag() {
   function onMove(cx, cy) {
     if (!dragging) return;
     const dx = cx - startX, dy = cy - startY;
-    chatWrap.style.left   = Math.max(0, Math.min(window.innerWidth  - chatWrap.offsetWidth, initLeft   + dx))
-    chatWrap.style.bottom = Math.max(0, Math.min(window.innerHeight - chatWrap.offsetHeight, initBottom - dy))
+    chatWrap.style.left =Math.max(0,Math.min(window.innerWidth - 380,initLeft + dx)) + 'px';
+    chatWrap.style.bottom =Math.max(0,Math.min(window.innerHeight - 100,initBottom - dy)) + 'px';
     chatWrap.style.top    = 'auto';
   }
 
