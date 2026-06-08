@@ -329,6 +329,12 @@ function buildChatUI() {
 
     <div id="chat-bgm-controls">
 
+      <button class="chat-header-btn" id="chat-size-small-btn">S</button>
+
+      <button class="chat-header-btn" id="chat-size-medium-btn">M</button>
+
+      <button class="chat-header-btn" id="chat-size-large-btn">L</button>
+
       <button class="chat-header-btn" id="bgm-play-btn">▶️</button>
 
       <button class="chat-header-btn" id="bgm-pause-btn">⏸</button>
@@ -371,6 +377,9 @@ function buildChatUI() {
   document.getElementById('bgm-pause-btn').addEventListener('click', pauseBGM);
   document.getElementById('bgm-stop-btn').addEventListener('click', stopBGM);
   document.getElementById('reset-affection-btn').addEventListener('click', resetAffection);
+  document.getElementById('chat-size-small-btn').addEventListener('click',() => setChatSize('small'));
+  document.getElementById('chat-size-medium-btn').addEventListener('click',() => setChatSize('medium'));
+  document.getElementById('chat-size-large-btn').addEventListener('click',() => setChatSize('large'));
 
 const volumeSlider =
   document.getElementById('bgm-volume-slider');
@@ -916,6 +925,42 @@ function resetAffection() {
   );
 
   updateAffectionDisplay();
+
+}
+
+  // =====================================================
+  // チャット欄サイズ変更
+  // =====================================================
+
+function setChatSize(size) {
+
+  const messages =
+    document.getElementById(
+      'chat-messages'
+    );
+
+  if (!messages) return;
+
+  if (size === 'small') {
+
+    messages.style.height =
+      '250px';
+
+  }
+
+  if (size === 'medium') {
+
+    messages.style.height =
+      '340px';
+
+  }
+
+  if (size === 'large') {
+
+    messages.style.height =
+      '500px';
+
+  }
 
 }
 
