@@ -75,7 +75,7 @@ function injectStyles() {
       padding: 10px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 4px;
       cursor: grab;
       user-select: none;
     }
@@ -91,7 +91,7 @@ function injectStyles() {
       transition: none;
     }
 
-    #chat-header-info { flex: 1; }
+    #chat-header-info {flex: 1;min-width: 0;}
     #chat-header-name { font-size:15px; font-weight:700; color:#e2e8f0; }
     #chat-header-status { font-size:11px; color:#64748b; margin-top:2px; }
     #chat-header-status.typing { color:#818cf8; }
