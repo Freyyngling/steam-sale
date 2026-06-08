@@ -713,6 +713,21 @@ nextOptions = Array.isArray(node.next?.[0])
   videoFile = node.video;
   nextOptions = node.next;
 
+  const level =
+  String(getAffectionLevel());
+
+if (
+  node.secretNext &&
+  node.secretNext[level]
+) {
+
+  nextOptions = [
+    ...nextOptions,
+    ...node.secretNext[level]
+  ];
+
+}
+
 }
   
   const level =
