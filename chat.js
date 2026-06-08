@@ -713,7 +713,9 @@ nextOptions = Array.isArray(node.next?.[0])
   videoFile = node.video;
   nextOptions = node.next;
 
-  const level =
+  }
+
+const level =
   String(getAffectionLevel());
 
 if (
@@ -728,11 +730,6 @@ if (
 
 }
 
-}
-  
-  const level =
-  String(getAffectionLevel());
-
 if (
   node.replyByLevel &&
   node.replyByLevel[level]
@@ -743,7 +740,7 @@ if (
 
 }
 
-  isTyping = true;
+isTyping = true;
   chatSend.disabled = true;
   choicesWrap.innerHTML = '';
 
