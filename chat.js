@@ -739,6 +739,32 @@ if (
     node.replyByLevel[level];
 
 }
+  
+if (
+  node.voiceByLevel &&
+  node.voiceByLevel[level]
+) {
+
+  voiceFile =
+    node.voiceByLevel[level];
+
+}
+
+if (
+  node.emotionByLevel &&
+  node.emotionByLevel[level]
+) {
+  emotionKey =
+    node.emotionByLevel[level];
+}
+
+if (
+  node.bgmByLevel &&
+  node.bgmByLevel[level]
+) {
+  bgmFile =
+    node.bgmByLevel[level];
+}
 
 isTyping = true;
   chatSend.disabled = true;
