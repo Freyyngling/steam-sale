@@ -854,6 +854,18 @@ function resetAffection() {
 
 }
 
+function getAffectionLevel() {
+
+  if (affection >= 100) return 4;
+
+  if (affection >= 50) return 3;
+
+  if (affection >= 20) return 2;
+
+  return 1;
+
+  }
+
   
   // =====================================================
   // BGM再生
