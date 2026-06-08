@@ -927,7 +927,7 @@ let bgmPlayer = new Audio();
 
 bgmPlayer.loop = true;
 
-bgmPlayer.volume = 0.3;
+bgmPlayer.volume = 0.2;
 
   const savedVolume =
   localStorage.getItem("bgmVolume");
@@ -1019,7 +1019,7 @@ function playSound(file) {
 
   const sound = new Audio("sound/" + file);
 
-  sound.volume = 0.3;
+  sound.volume = 0.4;
 
   sound.play().catch(() => {});
 
