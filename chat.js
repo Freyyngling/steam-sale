@@ -58,11 +58,13 @@ function injectStyles() {
       border: 1px solid rgba(129,140,248,0.5);
       border-radius: 16px;
       overflow: auto;
+      resize: both;
       display: flex;
       flex-direction: column;
       box-shadow: 0 8px 40px rgba(0,0,0,0.7);
       animation: chatSlideIn 0.25s ease;
     }
+    
     @keyframes chatSlideIn {
       from { opacity:0; transform:translateY(16px) scale(0.97); }
       to   { opacity:1; transform:translateY(0) scale(1); }
