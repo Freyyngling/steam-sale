@@ -1019,7 +1019,7 @@ function playSound(file) {
 
   const sound = new Audio("sound/" + file);
 
-  sound.volume = 0.3;
+  sound.volume = 0.1;
 
   sound.play().catch(() => {});
 
