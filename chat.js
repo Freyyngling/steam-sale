@@ -716,7 +716,7 @@ nextOptions = Array.isArray(node.next?.[0])
 }
   
   const level =
-  getAffectionLevel();
+  String(getAffectionLevel());
 
 if (
   node.replyByLevel &&
