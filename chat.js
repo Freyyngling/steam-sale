@@ -321,6 +321,7 @@ function buildChatUI() {
        id="bgm-volume-slider"
        min="0"
        max="100"
+       style="width:50px;"
      >
 
     </div>
