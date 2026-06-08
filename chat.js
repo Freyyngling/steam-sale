@@ -46,7 +46,7 @@ function injectStyles() {
       position: fixed;
       bottom: 60px;
       left: 20px;
-      width: 400px;
+      width: 380px;
       z-index: 9500;
       display: none;
       flex-direction: column;
