@@ -46,7 +46,7 @@ function injectStyles() {
       position: fixed;
       bottom: 60px;
       left: 20px;
-      width: 390px;
+      width: 450px;
       z-index: 9500;
       display: none;
       flex-direction: column;
@@ -290,6 +290,7 @@ function buildChatUI() {
     <div id="chat-window">
       <div id="chat-header">
         <img id="chat-header-avatar" src="front-smile.png" alt="avatar">
+        <div id="chat-header-info">
 
     <div id="chat-header-info">
 
