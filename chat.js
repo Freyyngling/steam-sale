@@ -714,6 +714,19 @@ nextOptions = Array.isArray(node.next?.[0])
   nextOptions = node.next;
 
 }
+  
+  const level =
+  getAffectionLevel();
+
+if (
+  node.replyByLevel &&
+  node.replyByLevel[level]
+) {
+
+  replyText =
+    node.replyByLevel[level];
+
+}
 
   isTyping = true;
   chatSend.disabled = true;
