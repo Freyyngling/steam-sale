@@ -18,7 +18,21 @@
   },
 
   "emotion": "smile",
-    "voice": "yaa.mp3",
+    
+    "voice": "hajimemasite.mp3",
+
+"voiceByLevel": {
+
+  "1": "hajimemasite.mp3",
+
+  "2": "konnichiwa.mp3",
+
+  "3": "yondakana.mp3",
+
+  "4": "yahoo.mp3"
+
+},
+    
     "bgm": "hajimari.mp3",
     "sound": "fan.mp3",
     "effect": "shake",
