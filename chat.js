@@ -287,14 +287,12 @@ function buildChatUI() {
   chatWrap = document.createElement('div');
   chatWrap.id = 'chat-wrap';
   chatWrap.innerHTML = `
-    <div id="chat-window">
-      <div id="chat-header">
-        <img id="chat-header-avatar" src="front-smile.png" alt="avatar">
-        <div id="chat-header-info">
-
-    <div id="chat-header-info">
-
-  <div id="chat-header-line1">
+    <div id="chat-window">     
+    <div id="chat-header">       
+    <img id="chat-header-avatar" src="front-smile.png" alt="avatar">      
+    <div id="chat-header-info">    
+    <div id="chat-header-info">  
+    <div id="chat-header-line1">
 
     <div id="chat-header-name">セール観測員</div>
 
