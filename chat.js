@@ -290,7 +290,7 @@ function buildChatUI() {
     <div id="chat-window">
       <div id="chat-header">
         <img id="chat-header-avatar" src="front-smile.png" alt="avatar">
-        <div id="chat-header-info">
+
     <div id="chat-header-info">
 
   <div id="chat-header-line1">
