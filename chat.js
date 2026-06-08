@@ -57,7 +57,7 @@ function injectStyles() {
       background: rgba(10,14,23,0.97);
       border: 1px solid rgba(129,140,248,0.5);
       border-radius: 16px;
-      overflow: hidden;
+      overflow: auto;
       display: flex;
       flex-direction: column;
       box-shadow: 0 8px 40px rgba(0,0,0,0.7);
@@ -112,7 +112,7 @@ function injectStyles() {
     #chat-close-btn:hover { color: #f87171; border-color: #f87171; }
 
     #chat-messages {
-      height: 340px;
+      height: 400px;
       overflow-y: auto;
       padding: 14px 14px 6px;
       display: flex;
@@ -483,8 +483,8 @@ function setupChatDrag() {
   function onMove(cx, cy) {
     if (!dragging) return;
     const dx = cx - startX, dy = cy - startY;
-    chatWrap.style.left   = Math.max(0, Math.min(window.innerWidth  - 380, initLeft   + dx)) + 'px';
-    chatWrap.style.bottom = Math.max(0, Math.min(window.innerHeight - 100, initBottom - dy)) + 'px';
+    chatWrap.style.left   = Math.max(0, Math.min(window.innerWidth  - chatWrap.offsetWidth, initLeft   + dx))
+    chatWrap.style.bottom = Math.max(0, Math.min(window.innerHeight - chatWrap.offsetHeight, initBottom - dy))
     chatWrap.style.top    = 'auto';
   }
 
