@@ -321,7 +321,6 @@ function buildChatUI() {
        id="bgm-volume-slider"
        min="0"
        max="100"
-       style="width:50px;"
      >
 
     </div>
@@ -345,7 +344,7 @@ function buildChatUI() {
     </div>
 
   </div>
-
+  <div style="margin-left:auto;"></div>
   <button class="chat-header-btn" id="chat-clear-btn">🗑</button>
   <button class="chat-header-btn" id="chat-close-btn">✕</button>
       </div>
