@@ -57,8 +57,7 @@ function injectStyles() {
       background: rgba(10,14,23,0.97);
       border: 1px solid rgba(129,140,248,0.5);
       border-radius: 16px;
-      overflow: auto;
-      resize: both;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       box-shadow: 0 8px 40px rgba(0,0,0,0.7);
