@@ -290,15 +290,27 @@ function buildChatUI() {
       <div id="chat-header">
         <img id="chat-header-avatar" src="front-smile.png" alt="avatar">
         <div id="chat-header-info">
+    <div id="chat-header-info">
+
+  <div id="chat-header-line1">
+
     <div id="chat-header-name">セール観測員</div>
 
     <div id="chat-header-status">オンライン</div>
 
+  </div>
+
+  <div id="chat-header-line2">
+
     <div id="affection-display">親密度：0</div>
 
     <div id="affection-rank">ランク：初対面</div>
-    
-    <div id="bgm-name">♪ BGMなし</div>
+
+  </div>
+
+  <div id="bgm-name">♪ BGMなし</div>
+
+</div>
 
     <div id="chat-audio-controls">
 
