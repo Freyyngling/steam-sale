@@ -169,3 +169,10 @@
   font-size: 11px;
   color: #38bdf8;
 }
+
+#chat-header-line1,
+#chat-header-line2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
