@@ -661,6 +661,43 @@ function respond(key) {
   if (key !== "start") {
 
     affection++;
+    const currentLevel =
+      getAffectionLevel();
+    
+  if (currentLevel > lastLevel) {
+
+  playSound("levelup.mp3");
+
+  if (currentLevel === 2) {
+
+    addMessage(
+      "🔓 開発裏話が解放されました",
+      "char"
+    );
+
+  }
+
+  if (currentLevel === 3) {
+
+    addMessage(
+      "🔓 秘密の話が解放されました",
+      "char"
+    );
+
+  }
+
+  if (currentLevel === 4) {
+
+    addMessage(
+      "🔓 もっと秘密の話が解放されました",
+      "char"
+    );
+
+  }
+
+  lastLevel = currentLevel;
+
+      }
 
     localStorage.setItem(
       "affection",
