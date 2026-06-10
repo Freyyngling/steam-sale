@@ -1128,6 +1128,24 @@ function playSound(file) {
 function playEffect(effect) {
 
   const petEl = document.getElementById('pet-char');
+  
+  if (effect === "chatShake") {
+
+    chatWrap.classList.add(
+      "chat-shake"
+    );
+
+    setTimeout(() => {
+
+      chatWrap.classList.remove(
+        "chat-shake"
+      );
+
+    }, 500);
+
+    return;
+
+  }
 
   if (!petEl) return;
 
