@@ -893,6 +893,7 @@ function playVoice(file) {
 // =====================================================
 
 let affection = 0;
+let lastLevel = 1;
 
 const savedAffection =
   localStorage.getItem(
