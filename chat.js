@@ -672,7 +672,7 @@ function respond(key) {
   if (currentLevel === 2) {
 
     addMessage(
-      "🔓 開発裏話が解放されました",
+      "🔓 どこかで、開発裏話が解放されました",
       "char"
     );
 
@@ -681,7 +681,7 @@ function respond(key) {
   if (currentLevel === 3) {
 
     addMessage(
-      "🔓 秘密の話が解放されました",
+      "🔓 どこかで、秘密の話が解放されました",
       "char"
     );
 
@@ -690,7 +690,7 @@ function respond(key) {
   if (currentLevel === 4) {
 
     addMessage(
-      "🔓 もっと秘密の話が解放されました",
+      "🔓 どこかで、もっと秘密の話が解放されました",
       "char"
     );
 
