@@ -274,6 +274,7 @@ function injectStyles() {
       70%  { transform: scale(0.95) rotate(2deg); }
       100% { transform: scale(1) rotate(0deg); }
     }
+    
     .chat-shake {
 
   animation:
@@ -701,7 +702,8 @@ function respond(key) {
   if (currentLevel > lastLevel) {
 
       playSound("levelup.mp3");
-      playEffect("chatshake");
+    
+      playEffect("chatShake");
 
   if (currentLevel === 2) {
 
