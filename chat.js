@@ -667,7 +667,7 @@ function respond(key) {
   if (currentLevel > lastLevel) {
 
       playSound("levelup.mp3");
-      playEffect("shake");
+      playEffect("chat-shake");
 
   if (currentLevel === 2) {
 
