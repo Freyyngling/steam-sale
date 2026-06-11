@@ -537,6 +537,30 @@
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     gap: 16px;
   }
+  
+  /* 小さいスマホの時だけ3列表示 */
+  @media (max-width: 480px) {
+
+  .band-grid,
+  #plain-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .game-name {
+    font-size: 11px;
+    min-height: auto;
+  }
+
+  .sale-price {
+    font-size: 14px;
+  }
+
+  .discount-badge {
+    font-size: 14px;
+  }
+
+  }
 
   /* カード */
   .game-card {
