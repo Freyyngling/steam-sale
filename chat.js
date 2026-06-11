@@ -1281,16 +1281,75 @@ function volumeUp() {
   // フリー入力
   // =====================================================
 function matchKeyword(text) {
+
   if (!chatData) return null;
-  const lower = text.toLowerCase();
-  if (chatData[text]) return text;
-  const kws = chatData['_keywords'];
-  if (kws) {
-    for (const [kw, target] of Object.entries(kws)) {
-      if (lower.includes(kw.toLowerCase())) return target;
+
+  const lower =
+    text.toLowerCase();
+
+  // 複合キーワード
+
+  const groups =
+    chatData["_keywordGroups"];
+
+  if (groups) {
+
+    for (
+      const [target, patterns]
+      of Object.entries(groups)
+    ) {
+
+      for (
+        const pattern
+        of patterns
+      ) {
+
+        const matched =
+          pattern.every(word =>
+            lower.includes(
+              word.toLowerCase()
+            )
+          );
+
+        if (matched) {
+          return target;
+        }
+
+      }
+
     }
+
   }
+
+  // 単独キーワード
+
+  if (chatData[text])
+    return text;
+
+  const kws =
+    chatData["_keywords"];
+
+  if (kws) {
+
+    for (
+      const [kw, target]
+      of Object.entries(kws)
+    ) {
+
+      if (
+        lower.includes(
+          kw.toLowerCase()
+        )
+      ) {
+        return target;
+      }
+
+    }
+
+  }
+
   return null;
+
 }
 
 function onSendInput() {
