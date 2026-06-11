@@ -274,6 +274,40 @@ function injectStyles() {
       70%  { transform: scale(0.95) rotate(2deg); }
       100% { transform: scale(1) rotate(0deg); }
     }
+    .chat-shake {
+
+  animation:
+    chatShake 0.5s;
+
+}
+
+@keyframes chatShake {
+
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-8px);
+  }
+
+  40% {
+    transform: translateX(8px);
+  }
+
+  60% {
+    transform: translateX(-8px);
+  }
+
+  80% {
+    transform: translateX(8px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+
+}
   `;
   document.head.appendChild(style);
 }
