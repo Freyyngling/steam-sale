@@ -414,7 +414,7 @@
   },
   
   "アクションが好き": {
-    "reply": "アクション！テンポが良くて気持ちいいよね。ベヲネッタ面白かったよ。アサシン・クリードシリーズもオススメだよ。中でも一番はUnity。アサシンシリーズの中でもコレは唯一、オンライン協力プレイが出来るよ。と言ってもクエスト単位だけどね。それでも結構面白いよ。PVも飛び切り、カッコ良かったんだよね〜。<br>https://www.youtube.com/watch?v=hA03JGCywfs<br>https://www.youtube.com/watch?v=UL11MyWoP0U<br>このふたつのプロモーションビデオがあまりにもカッコよく、買う事を決めたよ。",
+    "reply": "アクション！テンポが良くて気持ちいいよね。ベヲネッタ面白かったよ。アサシン・クリードシリーズもオススメだよ。中でも一番はUnity。アサシンシリーズの中でもコレは唯一、オンライン協力プレイが出来るよ。と言ってもクエスト単位だけどね。それでも結構面白いよ。PVも飛び切り、カッコ良かったんだよね〜。<br>UnityのPVはこちら<br><a href='https://www.youtube.com/watch?v=hA03JGCywfs' target='_blank'>▶ Unity PV1</a><br><a href='https://www.youtube.com/watch?v=UL11MyWoP0U' target='_blank'>▶ Unity PV2</a><br>このふたつのプロモーションビデオがあまりにもカッコよく、買う事を決めたよ。",
     "emotion": "happy1",
     "voice": "action.mp3",
     "next": ["ジャンルで絞り込む方法", "セールの豆知識", "ありがとう！", "雑談したい"]
