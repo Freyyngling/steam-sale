@@ -307,6 +307,15 @@ function injectStyles() {
   100% {
     transform: translateX(0);
   }
+  
+  .chat-msg-bubble a {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.chat-msg-bubble a:hover {
+  color: #93c5fd;
+}
 
 }
   `;
@@ -613,16 +622,31 @@ function clearHistory() {
 // メッセージ追加
 // =====================================================
 function addMessage(text, type, imgSrc) {
+
+  const linkedText = text.replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+
   const msg = document.createElement('div');
   msg.className = 'chat-msg ' + type;
+
   if (type === 'char') {
+
     msg.innerHTML = `
-      <img class="chat-msg-avatar" src="${imgSrc || 'front-neutral.png'}" alt="">
-      <div class="chat-msg-bubble">${text}</div>
+      <img class="chat-msg-avatar"
+           src="${imgSrc || 'front-neutral.png'}"
+           alt="">
+      <div class="chat-msg-bubble">${linkedText}</div>
     `;
+
   } else {
-    msg.innerHTML = `<div class="chat-msg-bubble">${text}</div>`;
+
+    msg.innerHTML =
+      `<div class="chat-msg-bubble">${linkedText}</div>`;
+
   }
+
   chatMessages.appendChild(msg);
   chatHistory.push({ type, text });
   chatMessages.scrollTop = chatMessages.scrollHeight;
