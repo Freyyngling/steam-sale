@@ -311,7 +311,8 @@ function injectStyles() {
 }  
 
   `;
- 
+ document.head.appendChild(style);
+}
 
 // =====================================================
 // チャットUI構築
