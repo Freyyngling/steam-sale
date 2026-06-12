@@ -612,18 +612,17 @@ function clearHistory() {
 // =====================================================
 // メッセージ追加
 // =====================================================
-function addMessage(text, type, imgSrc) {   
-  const msg = document.createElement('div');   
-  msg.className = 'chat-msg ' + type;   
-  if (type === 'char') {     msg.innerHTML =       
-    <img class="chat-msg-avatar" src="${imgSrc || 'front-neutral.png'}" alt="">       
-    <div class="chat-msg-bubble">${text}</div>     ;   
-    } else {     
-    msg.innerHTML = <div class="chat-msg-bubble">${text}</div>;   }   
-      chatMessages.appendChild(msg);   
-    chatHistory.push({ type, text });  
-    chatMessages.scrollTop = chatMessages.scrollHeight; }
-  
+function addMessage(text, type, imgSrc) {
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + type;
+  if (type === 'char') {
+    msg.innerHTML = `
+      <img class="chat-msg-avatar" src="${imgSrc || 'front-neutral.png'}" alt="">
+      <div class="chat-msg-bubble">${text}</div>
+    `;
+  } else {
+    msg.innerHTML = `<div class="chat-msg-bubble">${text}</div>`;
+  }
   chatMessages.appendChild(msg);
   chatHistory.push({ type, text });
   chatMessages.scrollTop = chatMessages.scrollHeight;
