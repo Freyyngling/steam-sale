@@ -308,17 +308,8 @@ function injectStyles() {
     transform: translateX(0);
   }
 
-}
-  
+}  
 
-  .chat-msg-bubble a {
-  color: #60a5fa;
-  text-decoration: underline;
-}
-
-.chat-msg-bubble a:hover {
-  color: #93c5fd;
-}
   `;
  
 
